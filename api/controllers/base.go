@@ -6,7 +6,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	//"github.com/jinzhu/gorm"
+	//_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"lib2.0/api/models"
 )
 
@@ -16,18 +19,18 @@ type App struct {
 }
 
 // connect to db
-func (a *App) Initialize(DbHost, DbPort, DbUser, DbName string) {
+func (a *App) Initialize() {
 	var err error
-	DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable", DbHost, DbPort, DbUser, DbName)
+	const DNS = "postgres://postgres@localhost/lib?sslmode=disable"
 
-	a.DB, err = gorm.Open("postgres", DBURL)
+	a.DB, err = gorm.Open(postgres.Open(DNS), &gorm.Config{})
 	if err != nil {
-		fmt.Printf("\n Cannot connect to database %s", DbName)
+		fmt.Println(err.Error())
 		log.Fatal("This is the error:", err)
 	} else {
-		fmt.Printf("Connected to database %s ", DbName)
+		fmt.Printf("Connected to database lib")
 	}
-	a.DB.Debug().AutoMigrate(&models.Book{}, &models.Student{}, &models.Teacher{}, &models.Notification{})
+	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Teacher{}, &models.Book{}, &models.Notification{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 }
