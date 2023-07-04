@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/badoux/checkmail"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -65,6 +66,32 @@ func (s *Student) validate(action string) error {
 		return nil
 
 	default: //create function where all fields are required
+		if s.Username == "" {
+			return errors.New("Please Enter Username")
+		}
+		if s.Email == "" {
+			return errors.New("Please Enter Email Address")
+		}
+		if s.Password == "" {
+			return errors.New("Please Provide Password ")
+		}
+		if s.PhoneNumber == 0 {
+			return errors.New("Please enter phone number")
+		}
+		if err := checkmail.ValidateFormat(s.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		return nil
 	}
 
+}
+
+//func saveStudent adds student to database
+func (s *Student) saveStudent (db *gorm.DB) (*Student, error){
+	var err error
+	err= db.Debug().Create(&s).Error
+	if err != nil{
+		return &Student{}, err
+	}
+	return s, nil
 }
