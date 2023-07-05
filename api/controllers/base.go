@@ -34,7 +34,7 @@ func (a *App) Initialize() {
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 }
-
+//Starts server connection
 func (a *App) RunServer() {
 	log.Printf("\nServer starting on port 8001")
 	log.Fatal(http.ListenAndServe(":8001", a.Router))
