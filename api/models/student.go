@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/badoux/checkmail"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Student struct {
@@ -54,7 +54,7 @@ func (s *Student) Prepare() {
 }
 
 // Validate user input
-func (s *Student) validate(action string) error {
+func (s *Student) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "login":
 		if s.Email == "" {
@@ -86,12 +86,21 @@ func (s *Student) validate(action string) error {
 
 }
 
-//func saveStudent adds student to database
-func (s *Student) saveStudent (db *gorm.DB) (*Student, error){
+// func SaveStudent adds student to database
+func (s *Student) SaveStudent(db *gorm.DB) (*Student, error) {
 	var err error
-	err= db.Debug().Create(&s).Error
-	if err != nil{
+	err = db.Debug().Create(&s).Error
+	if err != nil {
 		return &Student{}, err
 	}
 	return s, nil
+}
+
+// Get  Student based on email or phone number
+func (s *Student) GetStudent(db *gorm.DB) (*Student, error) {
+	account := &Student{}
+	if err := db.Debug().Table("students").Where("email= ?", s.Email).Or("phonenumber=?", s.PhoneNumber).First(account).Error; err != nil {
+		return nil, err
+	}
+	return account, nil
 }
