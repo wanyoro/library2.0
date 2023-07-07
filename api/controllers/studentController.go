@@ -77,6 +77,29 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stu, err := student.GetStudent(a.DB)
-	if 
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "Please signup"
+		responses.JSON(w, http.StatusBadRequest, resp)
+		return
+	}
+
+	err = models.CheckPasswCheckPasswordHash(student.Password, stu.Password)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "login failed check password"
+		responses.JSON(w, http.StatusForbidden, resp)
+		return
+
+	}
+	token, err := utils.EncodeAuthToken(stu.ID)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	resp["token"] = token
+	responses.JSON(w, http.StatusOK, resp)
+	return
 
 }

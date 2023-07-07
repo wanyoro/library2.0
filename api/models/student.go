@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/badoux/checkmail"
@@ -93,7 +94,7 @@ func (s *Student) SaveStudent(db *gorm.DB) (*Student, error) {
 	if err != nil {
 		return &Student{}, err
 	}
-	return s, nil
+	
 }
 
 // Get  Student based on email or phone number
@@ -104,3 +105,4 @@ func (s *Student) GetStudent(db *gorm.DB) (*Student, error) {
 	}
 	return account, nil
 }
+ 
