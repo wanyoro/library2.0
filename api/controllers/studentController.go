@@ -7,6 +7,7 @@ import (
 
 	"lib2.0/api/models"
 	"lib2.0/api/responses"
+	"lib2.0/utils"
 )
 
 // StudentSignUp creates new student
@@ -84,7 +85,7 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.CheckPasswCheckPasswordHash(student.Password, stu.Password)
+	err = models.CheckPasswordHash(student.Password, stu.Password)
 	if err != nil {
 		resp["status"] = "failed"
 		resp["message"] = "login failed check password"
