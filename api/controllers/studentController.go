@@ -30,7 +30,7 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 	stu, _ := student.GetStudent(a.DB)
 	if stu != nil {
 		resp["status"] = "failure"
-		resp["message"] = "student already exists with this email address. Login"
+		resp["message"] = "student already exists with this email address please login"
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -79,8 +79,13 @@ func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 
 	stu, err := student.GetStudent(a.DB)
 	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if stu == nil {
 		resp["status"] = "failed"
-		resp["message"] = "Please signup"
+		resp["message"] = "Login failed please signup"
 		responses.JSON(w, http.StatusBadRequest, resp)
 		return
 	}

@@ -2,7 +2,7 @@ package models
 
 import (
 	"errors"
-	
+
 	"strings"
 
 	"github.com/badoux/checkmail"
@@ -59,7 +59,7 @@ func (s *Student) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "login":
 		if s.Email == "" {
-			return errors.New("Please enter email address")
+			return errors.New("please enter email address")
 		}
 		if s.Username == "" {
 			return errors.New("please provide username or phone number to login.")
@@ -68,16 +68,16 @@ func (s *Student) Validate(action string) error {
 
 	default: //create function where all fields are required
 		if s.Username == "" {
-			return errors.New("Please Enter Username")
+			return errors.New("please enter username")
 		}
 		if s.Email == "" {
-			return errors.New("Please Enter Email Address")
+			return errors.New("please enter email address")
 		}
 		if s.Password == "" {
-			return errors.New("Please Provide Password ")
+			return errors.New("please provide password ")
 		}
 		if s.PhoneNumber == 0 {
-			return errors.New("Please enter phone number")
+			return errors.New("please enter phone number")
 		}
 		if err := checkmail.ValidateFormat(s.Email); err != nil {
 			return errors.New("invalid email")
@@ -95,7 +95,7 @@ func (s *Student) SaveStudent(db *gorm.DB) (*Student, error) {
 		return &Student{}, err
 	}
 	return s, nil
-	
+
 }
 
 // Get  Student based on email or phone number
@@ -106,4 +106,3 @@ func (s *Student) GetStudent(db *gorm.DB) (*Student, error) {
 	}
 	return account, nil
 }
- 
