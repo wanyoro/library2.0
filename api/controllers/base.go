@@ -33,9 +33,20 @@ func (a *App) Initialize() {
 	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Teacher{}, &models.Book{}, &models.Notification{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
+	a.InitializeRoutes()
 }
-//Starts server connection
+
+// Starts server connection
 func (a *App) RunServer() {
 	log.Printf("\nServer starting on port 8001")
 	log.Fatal(http.ListenAndServe(":8001", a.Router))
+}
+
+// func InitializeRoutes sets http routes
+func (a *App) InitializeRoutes() {
+	//a.Router.HandleFunc("/")
+	a.Router.HandleFunc("/teachersignup", a.TeacherSignUp).Methods("POST")
+	a.Router.HandleFunc("/studentsignup", a.StudentSignUp).Methods("POST")
+	a.Router.HandleFunc("/teacherlogin", a.TeacherLogIn).Methods("POST")
+	a.Router.HandleFunc("/studentlogin", a.StudentLogin).Methods("POST")
 }

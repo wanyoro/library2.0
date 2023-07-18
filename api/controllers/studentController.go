@@ -54,7 +54,7 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 // func Login signs in user
-func (a *App) Login(w http.ResponseWriter, r *http.Request) {
+func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 	var resp = map[string]interface{}{"status": "success", "message": "logged in successfully"}
 
 	student := &models.Student{}

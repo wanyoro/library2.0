@@ -37,6 +37,7 @@ func (a *App) TeacherSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	teacher.Prepare()
+	teacher.BeforeSave()
 
 	err = teacher.Validate("")
 	if err != nil {
@@ -52,62 +53,61 @@ func (a *App) TeacherSignUp(w http.ResponseWriter, r *http.Request) {
 
 	resp["teacher"] = teacherCreated
 	responses.JSON(w, http.StatusCreated, resp)
-	
 
 }
 
-//func TeacherLogIn logins teacher to app
-func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request){
-	var resp = map[string]interface{}{"status":"Success", "message":"teacher logged in successfully"}
+// func TeacherLogIn logins teacher to app
+func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request) {
+	var resp = map[string]interface{}{"status": "Success", "message": "teacher logged in successfully"}
 
 	teacher := models.Teacher{}
 
 	body, err := ioutil.ReadAll(r.Body)
-	if err != nil{
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
-	err= json.Unmarshal(body, &teacher)
-	if err!= nil{
+	err = json.Unmarshal(body, &teacher)
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
 	teacher.Prepare()
 
-	err= teacher.Validate("login")
-	if err != nil{
+	err = teacher.Validate("login")
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
 	teach, err := teacher.GetTeacher(a.DB)
-	if err!= nil{
+	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	if teach == nil{
-		resp["status"]= "failed"
-		resp["message"]= "teacher not found please sign up"
+	if teach == nil {
+		resp["status"] = "failed"
+		resp["message"] = "teacher not found please sign up"
 		responses.JSON(w, http.StatusBadRequest, resp)
 		return
 	}
 
 	err = models.CheckPasswordHash(teacher.Password, teach.Password)
-	if err != nil{
-		resp["status"]= "failed"
-		resp["message"]= "login failed check password"
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "login failed check password"
 		responses.JSON(w, http.StatusUnauthorized, resp)
 		return
 	}
 	token, err := utils.EncodeAuthToken(teacher.ID)
-	if err!= nil{
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	resp["token"]= token
+	resp["token"] = token
 	responses.JSON(w, http.StatusOK, resp)
-	
+
 }
