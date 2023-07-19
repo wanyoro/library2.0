@@ -12,11 +12,11 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username     string `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber  int    `gorm:"size:20;not null"               json:"phonenumber"`
-	Email        string `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password     string `gorm:"size:100;not null"              json:"password"`
-	ProfileImage string `gorm:"size:255"                       json:"profileimage"`
+	Username    string `gorm:"size:100;not null"              json:"username"`
+	PhoneNumber int    `gorm:"size:20;not null"               json:"phonenumber"`
+	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password    string `gorm:"size:100;not null"              json:"password"`
+	//ProfileImage string `gorm:"size:255"                       json:"profileimage"`
 	Books        []Book
 	Notification Notification
 }
@@ -51,7 +51,7 @@ func (s *Student) BeforeSave() error {
 func (s *Student) Prepare() {
 	s.Email = strings.TrimSpace(s.Email)
 	s.Username = strings.TrimSpace(s.Username)
-	s.ProfileImage = strings.TrimSpace(s.ProfileImage)
+	//s.ProfileImage = strings.TrimSpace(s.ProfileImage)
 }
 
 // Validate user input
@@ -61,8 +61,8 @@ func (s *Student) Validate(action string) error {
 		if s.Email == "" {
 			return errors.New("please enter email address")
 		}
-		if s.Username == "" {
-			return errors.New("please provide username or phone number to login.")
+		if s.Password == "" {
+			return errors.New("please provide password to login")
 		}
 		return nil
 
@@ -89,8 +89,8 @@ func (s *Student) Validate(action string) error {
 
 // func SaveStudent adds student to database
 func (s *Student) SaveStudent(db *gorm.DB) (*Student, error) {
-	var err error
-	err = db.Debug().Create(&s).Error
+	//var err error
+	err := db.Debug().Create(&s).Error
 	if err != nil {
 		return &Student{}, err
 	}
@@ -101,7 +101,7 @@ func (s *Student) SaveStudent(db *gorm.DB) (*Student, error) {
 // Get  Student based on email or phone number
 func (s *Student) GetStudent(db *gorm.DB) (*Student, error) {
 	account := &Student{}
-	if err := db.Debug().Table("students").Where("email= ?", s.Email).Or("phonenumber=?", s.PhoneNumber).First(account).Error; err != nil {
+	if err := db.Debug().Table("students").Where("email= ?", s.Email).First(account).Error; err != nil {
 		return nil, err
 	}
 	return account, nil

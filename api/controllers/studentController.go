@@ -34,6 +34,7 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
+	student.BeforeSave()
 	student.Prepare()
 
 	err = student.Validate("")
@@ -109,3 +110,45 @@ func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+//func UpdateStudent updates student info and reading progress
+func (a *App) UpdateStudent (w http.ResponseWriter, r*http.Request)
+var resp = map[string]interface{}{"status":"success", "message":"student updated successfully"}
+
+//params := mux.vars(r)
+id, err:= strconv.Atoi(params["id"])
+if err!= nil {
+	responses.ERROR(w, http.StatusBadRequest, errors.New("invalid id"))
+	return
+}
+
+body, err := ioutil.ReadAll(r.Body)
+if err!= nil{
+	responses.ERROR(w, http.StatusBadRequest, err)
+	return
+}
+
+studentGotten, err := student.GetStudentById(id, a.DB)
+if studentGotten == nil{
+	resp["message"]= "student not found"
+	responses.JSON(w, http.StatusNotfound, resp)
+	return
+}
+
+newStu := &models.Student{}
+
+err = json.Unmarshal(body, &newStu)
+if err != nil{
+	responses.ERROR(w, http.StatusBadRequest, err)
+	return
+}
+
+_, err= newStu.UpdateStudent(id, a.DB)
+if err!= nil{
+	responses.ERROR(w, http.StatusBadRequest, err)
+	return
+}
+
+resp["new student"]= newstu
+responses.JSON(w, http.StatusOk, resp)
+return
