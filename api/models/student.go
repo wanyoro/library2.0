@@ -17,7 +17,7 @@ type Student struct {
 	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
 	Password    string `gorm:"size:100;not null"              json:"password"`
 	//ProfileImage string `gorm:"size:255"                       json:"profileimage"`
-	Books        []Book
+	Books        *Book
 	Notification Notification
 }
 
@@ -105,4 +105,37 @@ func (s *Student) GetStudent(db *gorm.DB) (*Student, error) {
 		return nil, err
 	}
 	return account, nil
+}
+
+// function GetStudentById gets specific student by their id
+func (s *Student) GetStudentById(id int, db *gorm.DB) (*Student, error) {
+	user := &Student{}
+
+	if err := db.Debug().Table("students").Where("id= ?", id).First(user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// function UpdateUser updates specific user
+func (s *Student) UpdateStudent(id int, db *gorm.DB) (*Student, error) {
+	if err := db.Debug().Table("students").Where("id= ?", s.ID).Updates(Student{
+		Username:    s.Username,
+		Email:       s.Email,
+		Password:    s.Password,
+		PhoneNumber: s.PhoneNumber}).Error; err != nil {
+		return &Student{}, err
+	}
+	return s, nil
+
+}
+
+// func GetStudents gets all students in db
+func (s *Student) GetStudents(db *gorm.DB) (*[]Student, error) {
+	users := []Student{}
+	if err := db.Debug().Table("students").Find(&users).Error; err != nil {
+		return &[]Student{}, err
+	}
+	return &users, nil
 }

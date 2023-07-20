@@ -2,12 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"lib2.0/api/models"
 	"lib2.0/api/responses"
 	"lib2.0/utils"
+
+	"github.com/gorilla/mux"
 )
 
 // StudentSignUp creates new student
@@ -50,7 +54,6 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	resp["student"] = studentCreated
 	responses.JSON(w, http.StatusCreated, resp)
-	return
 
 }
 
@@ -111,44 +114,65 @@ func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func UpdateStudent updates student info and reading progress
-func (a *App) UpdateStudent (w http.ResponseWriter, r*http.Request)
-var resp = map[string]interface{}{"status":"success", "message":"student updated successfully"}
+// func UpdateStudent updates student info and reading progress
+func (a *App) UpdateStudent(w http.ResponseWriter, r *http.Request) {
+	var resp = map[string]interface{}{"status": "success", "message": "student updated successfully"}
+	w.Header().Set("Content-Type", "Aplication/json")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, errors.New("invalid id"))
+		return
+	}
 
-//params := mux.vars(r)
-id, err:= strconv.Atoi(params["id"])
-if err!= nil {
-	responses.ERROR(w, http.StatusBadRequest, errors.New("invalid id"))
-	return
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	student := models.Student{}
+	studentGotten, err := student.GetStudentById(id, a.DB)
+	if err != nil {
+		resp["message"] = "student not found"
+		responses.JSON(w, http.StatusBadRequest, resp)
+		return
+	}
+
+	//newStu := &models.Student{}
+
+	err = json.Unmarshal(body, &studentGotten)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	student.BeforeSave()
+	updatedStudent, err := studentGotten.UpdateStudent(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	token, err := utils.EncodeAuthToken(updatedStudent.ID)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	resp["token"] = token
+	responses.JSON(w, http.StatusOK, resp)
+
 }
 
-body, err := ioutil.ReadAll(r.Body)
-if err!= nil{
-	responses.ERROR(w, http.StatusBadRequest, err)
+// func GetStudents gets all students from db
+func (a *App) GetStudents(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	allStudents := models.Student{}
+	students, err := allStudents.GetStudents(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+	responses.JSON(w, http.StatusOK, students)
 	return
 }
-
-studentGotten, err := student.GetStudentById(id, a.DB)
-if studentGotten == nil{
-	resp["message"]= "student not found"
-	responses.JSON(w, http.StatusNotfound, resp)
-	return
-}
-
-newStu := &models.Student{}
-
-err = json.Unmarshal(body, &newStu)
-if err != nil{
-	responses.ERROR(w, http.StatusBadRequest, err)
-	return
-}
-
-_, err= newStu.UpdateStudent(id, a.DB)
-if err!= nil{
-	responses.ERROR(w, http.StatusBadRequest, err)
-	return
-}
-
-resp["new student"]= newstu
-responses.JSON(w, http.StatusOk, resp)
-return
