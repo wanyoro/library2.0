@@ -30,7 +30,7 @@ func (a *App) Initialize() {
 	} else {
 		fmt.Printf("Connected to database lib")
 	}
-	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Teacher{}, &models.Book{}, &models.Notification{})
+	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 	a.InitializeRoutes()

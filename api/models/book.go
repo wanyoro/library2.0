@@ -10,8 +10,8 @@ import (
 type Book struct {
 	gorm.Model
 	Subject   string `gorm:"size:50;not null" json:"subject"`
-	StudentId uint
-	IsRead    bool `gorm:"size:50"          json:"isread"`
+	StudentID int    // `gorm:"foreignKey:StudentID"`
+	IsRead    bool   `gorm:"size:50"          json:"isread"`
 }
 
 // Prepare strips off white spaces
@@ -36,7 +36,7 @@ func (b *Book) Validate(action string) error {
 		return nil
 
 	case "issuebook":
-		if b.StudentId == 0 {
+		if b.StudentID == 0 {
 			return errors.New("please input student id")
 		}
 
