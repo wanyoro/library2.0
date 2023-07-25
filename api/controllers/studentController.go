@@ -176,3 +176,15 @@ func (a *App) GetStudents(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, students)
 	return
 }
+
+// func GetStudentsAndBooks get students with assigned books
+func (a *App) GetStudentsAndBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	snb, err := models.GetStudentsAndBooks(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+
+	}
+	responses.JSON(w, http.StatusOK, snb)
+	return
+}

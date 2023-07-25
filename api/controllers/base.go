@@ -54,4 +54,5 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/getbooks", a.GetBooks).Methods("GET")
 	a.Router.HandleFunc("/updatestudent/{id}", a.UpdateStudent).Methods("PUT")
 	a.Router.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
+	a.Router.HandleFunc("/getstudentsandbooks", a.GetStudentsAndBooks).Methods("GET")
 }

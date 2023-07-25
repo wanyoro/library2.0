@@ -12,12 +12,11 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username    string `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber int    `gorm:"size:20;not null"               json:"phonenumber"`
-	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password    string `gorm:"size:100;not null"              json:"password"`
-	//ProfileImage string `gorm:"size:255"                       json:"profileimage"`
-	Books        *Book `json:"books"`
+	Username     string `gorm:"size:100;not null"              json:"username"`
+	PhoneNumber  int    `gorm:"size:20;not null"               json:"phonenumber"`
+	Email        string `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password     string `gorm:"size:100;not null"              json:"password"`
+	Books        *Book  `json:"books"`
 	Notification Notification
 }
 
@@ -134,7 +133,17 @@ func (s *Student) UpdateStudent(id int, db *gorm.DB) (*Student, error) {
 // func GetStudents gets all students in db
 func GetStudents(db *gorm.DB) (*[]Student, error) {
 	users := []Student{}
-	if err := db.Debug().Raw("select * from students inner join books on books.student_id= students.id").Scan(&users).Error; err != nil {
+	if err := db.Debug().Table("students").Find(&users).Error; err != nil {
+		return &[]Student{}, err
+	}
+	return &users, nil
+}
+
+// func GetStudentsAndBooks gets students with assigned books
+func GetStudentsAndBooks(db *gorm.DB) (*[]Student, error) {
+	users := []Student{}
+	if err := db.Debug().Preload("Books").
+		Joins("INNER JOIN books on books.student_id = students.id").Find(&users).Error; err != nil {
 		return &[]Student{}, err
 	}
 	return &users, nil
