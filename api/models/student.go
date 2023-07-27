@@ -12,11 +12,11 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username     string `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber  int    `gorm:"size:20;not null"               json:"phonenumber"`
-	Email        string `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password     string `gorm:"size:100;not null"              json:"password"`
-	Books        *Book  `json:"books"`
+	Username     string  `gorm:"size:100;not null"              json:"username"`
+	PhoneNumber  int     `gorm:"size:20;not null"               json:"phonenumber"`
+	Email        string  `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password     string  `gorm:"size:100;not null"              json:"password"`
+	Books        []*Book `json:"books"`
 	Notification Notification
 }
 

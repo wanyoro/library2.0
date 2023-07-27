@@ -110,7 +110,6 @@ func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 
 	resp["token"] = token
 	responses.JSON(w, http.StatusOK, resp)
-	return
 
 }
 
@@ -174,7 +173,7 @@ func (a *App) GetStudents(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 	}
 	responses.JSON(w, http.StatusOK, students)
-	return
+
 }
 
 // func GetStudentsAndBooks get students with assigned books
@@ -186,5 +185,5 @@ func (a *App) GetStudentsAndBooks(w http.ResponseWriter, r *http.Request) {
 
 	}
 	responses.JSON(w, http.StatusOK, snb)
-	return
+
 }

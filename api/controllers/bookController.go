@@ -30,15 +30,15 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	dbbook, _ := book.GetBookById(id, a.DB)
-	if dbbook != nil {
-		resp["status"] = "failed"
-		resp["message"] = "book number already exists"
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
+	// params := mux.Vars(r)
+	// id, err := strconv.Atoi(params["id"])
+	// dbbook, _ := book.GetBookById(id, a.DB)
+	// if dbbook != nil {
+	// 	resp["status"] = "failed"
+	// 	resp["message"] = "book number already exists"
+	// 	responses.ERROR(w, http.StatusBadRequest, err)
+	// 	return
+	// }
 
 	book.Prepare()
 
@@ -87,4 +87,46 @@ func (a *App) GetBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.JSON(w, http.StatusOK, books)
+}
+
+// func UpdateBook sets reading progress to true
+func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	book := models.Book{}
+	BookGotten, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "book does not exist in database"
+		return
+	}
+
+	err = json.Unmarshal(body, &BookGotten)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	book.Validate("updatereadingprogress")
+
+	UpdatedBook, err := BookGotten.UpdateBook(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "check book"
+		return
+	}
+	responses.JSON(w, http.StatusOK, UpdatedBook)
 }
