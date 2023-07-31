@@ -10,6 +10,7 @@ import (
 	//_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"lib2.0/api/middleware"
 	"lib2.0/api/models"
 )
 
@@ -45,13 +46,16 @@ func (a *App) RunServer() {
 // func InitializeRoutes sets http routes
 func (a *App) InitializeRoutes() {
 	//a.Router.HandleFunc("/")
+	a.Router.Use(middleware.SetContentTypeMiddleware)
+	s := a.Router.PathPrefix("/api").Subrouter()
+	s.Use(middleware.AuthJwtVerify)
 	a.Router.HandleFunc("/teachersignup", a.TeacherSignUp).Methods("POST")
 	a.Router.HandleFunc("/studentsignup", a.StudentSignUp).Methods("POST")
 	a.Router.HandleFunc("/teacherlogin", a.TeacherLogIn).Methods("POST")
 	a.Router.HandleFunc("/studentlogin", a.StudentLogin).Methods("POST")
 	a.Router.HandleFunc("/createbook", a.CreateBook).Methods("POST")
 	a.Router.HandleFunc("/getbook/{id}", a.GetBookById).Methods("GET")
-	a.Router.HandleFunc("/getbooks", a.GetBooks).Methods("GET")
+	s.HandleFunc("/getbooks", a.GetBooks).Methods("GET")
 	a.Router.HandleFunc("/updatestudent/{id}", a.UpdateStudent).Methods("PUT")
 	a.Router.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
 	a.Router.HandleFunc("/getstudentsandbooks", a.GetStudentsAndBooks).Methods("GET")

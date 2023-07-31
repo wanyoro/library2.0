@@ -9,9 +9,10 @@ import (
 
 type Book struct {
 	gorm.Model
-	Subject   string `gorm:"size:50;not null" json:"subject"`
-	StudentID int    // `gorm:"foreignKey:StudentID"`
-	IsRead    bool   `gorm:"size:50"          json:"isread"`
+	Subject string `gorm:"size:50;not null" json:"subject"`
+	//
+	IsRead    bool `gorm:"size:50"          json:"isread"`
+	StudentID uint //`gorm:"foreignKey:StudentID"`
 }
 
 // Prepare strips off white spaces
@@ -35,10 +36,10 @@ func (b *Book) Validate(action string) error {
 		}
 		return nil
 
-	case "issuebook":
-		if b.StudentID == 0 {
-			return errors.New("please input student id")
-		}
+	// case "issuebook":
+	// 	if b.StudentID == 0 {
+	// 		return errors.New("please input student id")
+	// 	}
 
 	case "updatereadingprogress":
 		if !b.IsRead {
@@ -79,11 +80,12 @@ func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
 	return &books, nil
 }
 
-//func UpdateBook updates reading progress to true
-func (b *Book) UpdateBook (id int, db *gorm.DB)(*Book, error){
-	if err :=db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
-	Subject: b.Subject,
-	IsRead: b.IsRead}).Error; err!= nil{
+// func UpdateBook updates reading progress to true
+func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
+	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
+		Subject:   b.Subject,
+		StudentID: b.StudentID,
+		IsRead:    b.IsRead}).Error; err != nil {
 		return &Book{}, err
 	}
 	return b, nil

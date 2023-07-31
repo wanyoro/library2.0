@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"fmt"
+	//"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -20,31 +20,31 @@ func SetContentTypeMiddleware(next http.Handler) http.Handler {
 }
 
 // func AuthJwtVerify verifies jwt token
-func AuthJwtVerify(next http.Handler) http.HandlerFunc {
+// AuthJwtVerify verify token and add userID to the request context
+func AuthJwtVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var resp = map[string]interface{}{"status": "failed", "message": "missing Auth token"}
+		var resp = map[string]interface{}{"status": "failed", "message": "Missing authorization token please login"}
 
-		var bearer = r.Header.Get("Authorization")
-		bearer = strings.TrimSpace(bearer)
+		var header = r.Header.Get("Authorization")
+		header = strings.TrimSpace(header)
 
-		if bearer == "" {
+		if header == "" {
 			responses.JSON(w, http.StatusForbidden, resp)
 			return
 		}
 
-		token, err := jwt.Parse(bearer, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("API_KEY")), nil
+		token, err := jwt.Parse(header, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("SECRET")), nil
 		})
 		if err != nil {
 			resp["status"] = "failed"
-			resp["message"] = "Invalid Token please login"
+			resp["message"] = "Invalid token, please login"
 			responses.JSON(w, http.StatusForbidden, resp)
-			fmt.Printf("%s", err)
 			return
 		}
 		claims, _ := token.Claims.(jwt.MapClaims)
 
-		ctx := context.WithValue(r.Context(), "studentID", claims["studentID"])
+		ctx := context.WithValue(r.Context(), "studentID", claims["studentID"]) // adding the user ID to the context
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
