@@ -57,7 +57,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/getbook/{id}", a.GetBookById).Methods("GET")
 	s.HandleFunc("/getbooks", a.GetBooks).Methods("GET")
 	a.Router.HandleFunc("/updatestudent/{id}", a.UpdateStudent).Methods("PUT")
-	a.Router.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
+	s.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
 	a.Router.HandleFunc("/getstudentsandbooks", a.GetStudentsAndBooks).Methods("GET")
 	a.Router.HandleFunc("/updatebook/{id}", a.UpdateBook).Methods("PUT")
 }
