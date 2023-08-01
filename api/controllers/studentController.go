@@ -168,6 +168,7 @@ func (a *App) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 func (a *App) GetStudents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	//allStudents := models.Student{}
+	
 	students, err := models.GetStudents(a.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
