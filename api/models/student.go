@@ -12,12 +12,19 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username     string `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber  int    `gorm:"size:20;not null"               json:"phonenumber"`
-	Email        string `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password     string `gorm:"size:100;not null"              json:"password"`
-	Books        []Book `json:"books" `
+	Username    string `gorm:"size:100;not null"              json:"username"`
+	PhoneNumber int    `gorm:"size:20;not null"               json:"phonenumber"`
+	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password    string `gorm:"size:100;not null"              json:"password"`
+	Books       []Book `json:"books" `
+	//BookCount    int    `json:"bookcount"`
 	Notification Notification
+	//tudentAndBooks StudentAndBooks
+}
+
+type StudentAndBooks struct {
+	StudentUsername string `gorm:"references:Username"`
+	BookCount       uint
 }
 
 // hashPassword hash user input password
@@ -147,4 +154,14 @@ func GetStudentsAndBooks(db *gorm.DB) (*[]Student, error) {
 		return &[]Student{}, err
 	}
 	return &users, nil
+}
+
+// func CountBooks counts books group by username
+func (s *Student) CountBooks(db *gorm.DB) (*[]StudentAndBooks, error) {
+	students := []StudentAndBooks{}
+	//var count int64
+	if err := db.Debug().Raw("select students.username as student_username ,students.book_count,count(books.subject) as book_count from students inner join books on books.student_id= students.id group by students.id").Scan(&students).Error; err != nil {
+		return &[]StudentAndBooks{}, err
+	}
+	return &students, nil
 }

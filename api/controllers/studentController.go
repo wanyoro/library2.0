@@ -168,7 +168,7 @@ func (a *App) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 func (a *App) GetStudents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	//allStudents := models.Student{}
-	
+
 	students, err := models.GetStudents(a.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
@@ -187,4 +187,15 @@ func (a *App) GetStudentsAndBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, snb)
 
+}
+
+// func GetStudentBookCount count number of assigned books
+func (a *App) GetStudentBookCount(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	bookcounted := models.Student{}
+	bookcount, err := bookcounted.CountBooks(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+	responses.JSON(w, http.StatusOK, bookcount)
 }

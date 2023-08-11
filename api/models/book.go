@@ -90,3 +90,6 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	}
 	return b, nil
 }
+
+
+

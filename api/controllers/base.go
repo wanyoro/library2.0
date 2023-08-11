@@ -31,7 +31,7 @@ func (a *App) Initialize() {
 	} else {
 		fmt.Printf("Connected to database lib")
 	}
-	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{})
+	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{}, &models.StudentAndBooks{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 	a.InitializeRoutes()
@@ -60,4 +60,5 @@ func (a *App) InitializeRoutes() {
 	s.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
 	a.Router.HandleFunc("/getstudentsandbooks", a.GetStudentsAndBooks).Methods("GET")
 	a.Router.HandleFunc("/updatebook/{id}", a.UpdateBook).Methods("PUT")
+	a.Router.HandleFunc("/getstudentbookcount", a.GetStudentBookCount).Methods("GET")
 }
