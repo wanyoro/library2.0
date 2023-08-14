@@ -102,7 +102,7 @@ func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request) {
 		responses.JSON(w, http.StatusUnauthorized, resp)
 		return
 	}
-	token, err := utils.EncodeAuthToken(teacher.ID)
+	token, err := utils.EncodeAuthTokenTeacher(teacher.ID)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return

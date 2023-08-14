@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
+	//"lib2.0/api/main"
 )
 
 type Book struct {
@@ -80,16 +81,35 @@ func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
 	return &books, nil
 }
 
-// func UpdateBook updates reading progress to true
+// func UpdateBook updates book subject and student assigned
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
+	//var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		Subject:   b.Subject,
-		StudentID: b.StudentID,
-		IsRead:    b.IsRead}).Error; err != nil {
+		StudentID: b.StudentID}).Error; err != nil {
+		return &Book{}, err
+	}
+	// student := Student{}
+	// type App struct {
+	// 	Router *mux.Router
+	// 	DB     *gorm.DB
+	// }
+	// a := App{}
+	// studentid, _ := student.GetStudentById(id, a.DB)
+	// if studentid.ID == 0 {
+	// 	resp["status"] = "failed"
+	// 	resp["message"] = "student does not exist please signup student"
+
+	// }
+	return b, nil
+}
+
+//func UpdateReadingProgress sets reading progress to true and creates notif
+func (b *Book) UpdateReadingProgress (id int, db *gorm.DB) (*Book, error){
+	if err := db.Debug().Table("books").Where("id= ?", b.ID).Updates(Book{
+		IsRead: b.IsRead,
+	}).Error; err!= nil{
 		return &Book{}, err
 	}
 	return b, nil
 }
-
-
-

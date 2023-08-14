@@ -102,7 +102,7 @@ func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	token, err := utils.EncodeAuthToken(stu.ID)
+	token, err := utils.EncodeAuthTokenStudent(stu.ID)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -153,7 +153,7 @@ func (a *App) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.EncodeAuthToken(updatedStudent.ID)
+	token, err := utils.EncodeAuthTokenStudent(updatedStudent.ID)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return

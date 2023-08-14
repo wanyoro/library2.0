@@ -8,11 +8,20 @@ import (
 )
 
 // func EncodeAuthToken createsauthenticaton token
-func EncodeAuthToken(uid uint) (string, error) {
+func EncodeAuthTokenStudent(uid uint) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["studentID"] = uid
 	claims["IssuedAt"] = time.Now().Unix()
-	claims["ExpiresAt"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["ExpiresAt"] = time.Now().Add(time.Hour * 2).Unix()
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), claims)
+	return token.SignedString([]byte(os.Getenv("SECRET")))
+}
+
+func EncodeAuthTokenTeacher(uid uint) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["teacherID"] = uid
+	claims["IssuedAt"] = time.Now().Unix()
+	claims["ExpiresAt"] = time.Now().Add(time.Hour * 2).Unix()
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), claims)
 	return token.SignedString([]byte(os.Getenv("SECRET")))
 }

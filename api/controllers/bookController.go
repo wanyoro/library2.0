@@ -126,7 +126,53 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp["status"] = "failed"
 		resp["message"] = "check book"
+
+	} else {
+		resp["status"] = "Success"
+		resp["message"] = "Book updated successfully"
+	}
+	resp["book"] = UpdatedBook
+	responses.JSON(w, http.StatusCreated, resp)
+}
+
+// func UpdateReadingProgress sets reading progress to true or false
+func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{"status": "Successful", "message": "progress updated successfully"}
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	responses.JSON(w, http.StatusOK, UpdatedBook)
+	book := models.Book{}
+	BookGot, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "book does not exist in database"
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = json.Unmarshal(body, &BookGot)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	UpdatedBook, err := BookGot.UpdateReadingProgress(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "check book"
+
+	} else {
+		resp["status"] = "Success"
+		resp["message"] = "Book updated successfully"
+	}
+	resp["book"] = UpdatedBook
+	responses.JSON(w, http.StatusCreated, resp)
 }

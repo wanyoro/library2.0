@@ -24,7 +24,9 @@ func (a *App) Initialize() {
 	var err error
 	const DNS = "postgres://postgres@localhost/lib?sslmode=disable"
 
-	a.DB, err = gorm.Open(postgres.Open(DNS), &gorm.Config{})
+	a.DB, err = gorm.Open(postgres.Open(DNS), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
+	})
 	if err != nil {
 		fmt.Println(err.Error())
 		log.Fatal("This is the error:", err)
@@ -59,6 +61,8 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/updatestudent/{id}", a.UpdateStudent).Methods("PUT")
 	s.HandleFunc("/getstudents", a.GetStudents).Methods("GET")
 	a.Router.HandleFunc("/getstudentsandbooks", a.GetStudentsAndBooks).Methods("GET")
-	a.Router.HandleFunc("/updatebook/{id}", a.UpdateBook).Methods("PUT")
+	s.HandleFunc("/updatebook/{id}", a.UpdateBook).Methods("PUT")
 	a.Router.HandleFunc("/getstudentbookcount", a.GetStudentBookCount).Methods("GET")
+	a.Router.HandleFunc("/createnotification", a.CreateNotif).Methods("POST")
+	a.Router.HandleFunc("/updatereadingprogress/{id}", a.UpdateReadingProgress).Methods("PUT")
 }
