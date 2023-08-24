@@ -145,17 +145,18 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	book := models.Book{}
-	BookGot, err := book.GetBookById(id, a.DB)
-	if err != nil {
-		resp["status"] = "failed"
-		resp["message"] = "book does not exist in database"
-		return
-	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	book := models.Book{}
+
+	BookGot, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "book does not exist in database"
 		return
 	}
 

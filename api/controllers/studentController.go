@@ -199,3 +199,22 @@ func (a *App) GetStudentBookCount(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, bookcount)
 }
+
+//func GetStudentById get specific student id
+func (a *App) GetStudentById (w http.ResponseWriter, r*http.Request){
+	w.Header().Set("Content-Type", "Application/json")
+	studentGot := models.Student{}
+	params:= mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err!= nil{
+		responses.JSON(w, http.StatusBadRequest, err)
+	}
+
+	
+	studentbyid, err:= studentGot.GetStudentById(id, a.DB)
+	if err!= nil{
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, studentbyid)
+}

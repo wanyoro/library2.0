@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
+	//"fmt"
 	//"lib2.0/api/main"
 )
 
@@ -12,8 +13,9 @@ type Book struct {
 	gorm.Model
 	Subject string `gorm:"size:50;not null" json:"subject"`
 	//
-	IsRead    bool `gorm:"size:50"          json:"isread"`
-	StudentID uint //`gorm:"foreignKey:StudentID"`
+	IsRead    *bool `gorm:"size:50"          json:"isread"`
+	StudentID uint  //`gorm:"foreignKey:StudentID"`
+	TeacherID uint
 }
 
 // Prepare strips off white spaces
@@ -37,15 +39,15 @@ func (b *Book) Validate(action string) error {
 		}
 		return nil
 
-	// case "issuebook":
-	// 	if b.StudentID == 0 {
-	// 		return errors.New("please input student id")
-	// 	}
+		// case "issuebook":
+		// 	if b.StudentID == 0 {
+		// 		return errors.New("please input student id")
+		// 	}
 
-	case "updatereadingprogress":
-		if !b.IsRead {
-			return errors.New("please update reading progress")
-		}
+		// case "updatereadingprogress":
+		// 	if !b.IsRead {
+		// 		return errors.New("please update reading progress")
+		// 	}
 	}
 	return nil
 
@@ -84,32 +86,37 @@ func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
 // func UpdateBook updates book subject and student assigned
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	//var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
+	BookSubject := *Book.Subject
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
-		Subject:   b.Subject,
-		StudentID: b.StudentID}).Error; err != nil {
+		//Subject: b.Subject,
+
+		StudentID: b.StudentID,
+		IsRead:    b.IsRead,
+		TeacherID: b.TeacherID}).Error; err != nil {
 		return &Book{}, err
 	}
-	// student := Student{}
-	// type App struct {
-	// 	Router *mux.Router
-	// 	DB     *gorm.DB
-	// }
-	// a := App{}
-	// studentid, _ := student.GetStudentById(id, a.DB)
-	// if studentid.ID == 0 {
-	// 	resp["status"] = "failed"
-	// 	resp["message"] = "student does not exist please signup student"
+	if *b.IsRead {
+		db.Debug().Create(&Notification{
+			Message:     "Book is read",
+			StudentID:   b.StudentID,
+			BookSubject: BookSubject,
+			TeacherID:   b.TeacherID,
+		})
+	}
 
-	// }
 	return b, nil
 }
 
-//func UpdateReadingProgress sets reading progress to true and creates notif
-func (b *Book) UpdateReadingProgress (id int, db *gorm.DB) (*Book, error){
+// func UpdateReadingProgress sets reading progress to true and creates notif
+func (b *Book) UpdateReadingProgress(id int, db *gorm.DB) (*Book, error) {
 	if err := db.Debug().Table("books").Where("id= ?", b.ID).Updates(Book{
-		IsRead: b.IsRead,
-	}).Error; err!= nil{
+		IsRead: b.IsRead}).Error; err != nil {
 		return &Book{}, err
 	}
 	return b, nil
 }
+
+//func checks reading progress and returns boolean
+// func (b *Book) CheckReadingProgress (id int, db *gorm.DB) bool {
+// 	if err :=
+// }
