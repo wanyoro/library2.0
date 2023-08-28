@@ -86,7 +86,7 @@ func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
 // func UpdateBook updates book subject and student assigned
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	//var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
-	BookSubject := *Book.Subject
+	BookSubject := b.Subject
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		//Subject: b.Subject,
 
