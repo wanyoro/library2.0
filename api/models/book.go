@@ -87,6 +87,8 @@ func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	//var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
 	BookSubject := b.Subject
+	BookId := b.ID
+	notif := Notification{}
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		//Subject: b.Subject,
 
@@ -96,12 +98,15 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 		return &Book{}, err
 	}
 	if *b.IsRead {
-		db.Debug().Create(&Notification{
-			Message:     "Book is read",
-			StudentID:   b.StudentID,
-			BookSubject: BookSubject,
-			TeacherID:   b.TeacherID,
-		})
+		if db.Debug().Table("notifications").Where("book_subject= ?", BookSubject).First(&notif).RowsAffected == 0 {
+			db.Create(&Notification{
+				Message:     "Book is read",
+				StudentID:   b.StudentID,
+				BookSubject: BookSubject,
+				BookId:      BookId,
+				TeacherID:   b.TeacherID,
+			})
+		}
 	}
 
 	return b, nil

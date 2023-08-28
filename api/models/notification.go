@@ -5,10 +5,12 @@ import (
 )
 
 type Notification struct {
+	gorm.Model
 	Message     string `gorm:"size:200;not null" json:"message"`
 	StudentID   uint
 	TeacherID   uint
 	BookSubject string `gorm:"references:booksubject"`
+	BookId      uint   `gorm:"references:bookID"`
 	//TeacherUsername string `gorm:"foreignKey:teacherusername"`
 }
 
