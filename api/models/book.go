@@ -114,14 +114,21 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 
 // func UpdateReadingProgress sets reading progress to true and creates notif
 func (b *Book) UpdateReadingProgress(id int, db *gorm.DB) (*Book, error) {
-	if err := db.Debug().Table("books").Where("id= ?", b.ID).Updates(Book{
+	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		IsRead: b.IsRead}).Error; err != nil {
 		return &Book{}, err
 	}
 	return b, nil
 }
 
-//func checks reading progress and returns boolean
-// func (b *Book) CheckReadingProgress (id int, db *gorm.DB) bool {
-// 	if err :=
-// }
+
+// func return book returns book from student
+func (b *Book) ReturnBook(id int, db *gorm.DB) (*Book, error) {
+	
+	if err := db.Debug().Table("books").Where("id=?", b.ID).Updates(map[string]interface{}{"is_read": "false", "student_id": 0}).Error; err != nil {
+		return &Book{}, err
+	}
+	
+	return b, nil
+	
+}

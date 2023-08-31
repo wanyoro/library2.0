@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -18,7 +18,7 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	book := models.Book{}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -100,7 +100,7 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -146,7 +146,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -176,4 +176,36 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 	}
 	resp["book"] = UpdatedBook
 	responses.JSON(w, http.StatusCreated, resp)
+}
+
+// func ReturnBook updates values to default
+func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{"Status": "Successful", "Message": "Book returned successfully"}
+	params := mux.Vars(r)
+
+	id, _ := strconv.Atoi(params["id"])
+
+	book := models.Book{}
+
+	BookGot, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	//body, err := io.ReadAll()
+	// body, _ := json.Marshal(book)
+	// err = json.Unmarshal(body, BookReturned)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	ReturnedBook, err := BookGot.ReturnBook(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	resp["returned_book"] = ReturnedBook
+	responses.JSON(w, http.StatusOK, resp)
 }
