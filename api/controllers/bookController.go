@@ -193,13 +193,7 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-	//body, err := io.ReadAll()
-	// body, _ := json.Marshal(book)
-	// err = json.Unmarshal(body, BookReturned)
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusBadRequest, err)
-	// 	return
-	// }
+	
 
 	ReturnedBook, err := BookGot.ReturnBook(id, a.DB)
 	if err != nil {

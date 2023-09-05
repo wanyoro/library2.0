@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -19,7 +19,7 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 	var resp = map[string]interface{}{"status": "success", "message": "student registered successfully"}
 
 	student := models.Student{}
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -62,7 +62,7 @@ func (a *App) StudentLogin(w http.ResponseWriter, r *http.Request) {
 	var resp = map[string]interface{}{"status": "success", "message": "logged in successfully"}
 
 	student := &models.Student{}
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -124,7 +124,7 @@ func (a *App) UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
@@ -218,3 +218,4 @@ func (a *App) GetStudentById (w http.ResponseWriter, r*http.Request){
 	}
 	responses.JSON(w, http.StatusOK, studentbyid)
 }
+

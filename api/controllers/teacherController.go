@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"lib2.0/api/models"
@@ -16,7 +16,7 @@ func (a *App) TeacherSignUp(w http.ResponseWriter, r *http.Request) {
 
 	teacher := models.Teacher{}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -62,7 +62,7 @@ func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request) {
 
 	teacher := models.Teacher{}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
