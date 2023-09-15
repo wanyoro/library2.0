@@ -14,7 +14,9 @@ type Notification struct {
 	//TeacherUsername string `gorm:"foreignKey:teacherusername"`
 }
 
-type booksubject string
+type Booksubjects struct {
+	BookSubject string `gorm:"references: Booksubject"`
+}
 
 // func CreateNotif creates notification when reading progress is set to true
 func (n *Notification) CreateNotif(db *gorm.DB) (*Notification, error) {
@@ -35,9 +37,9 @@ func (n *Notification) GetNotifs(db *gorm.DB) (*[]Notification, error) {
 }
 
 // func GetReadBooks gets books read by student
-func (n *Notification) GetReadBooks(student_id int, db *gorm.DB) (*[]Notification, error) {
+func (n *Notification) GetReadBooks(student_id int, db *gorm.DB) (*[]Booksubjects, error) {
 	//type book_subject string
-	notif := &[]Notification{}
+	notif := &[]Booksubjects{}
 	if err := db.Debug().Table("notifications").Select("book_subject").Where("student_id=?", student_id).Find(notif).Error; err != nil {
 		return nil, err
 	}
