@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	//"fmt"
+
 	"io"
 	"net/http"
 	"strconv"
@@ -113,6 +115,13 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		resp["message"] = "book does not exist in database"
 		return
 	}
+	if BookGotten.StudentID != 0 {
+		//err= errors.New("this book is already assigned to student")
+		resp["message"] = "failed"
+		resp["message"] = "this book is already assigned to student"
+		responses.JSON(w, http.StatusBadRequest, resp)
+		return
+	}
 
 	err = json.Unmarshal(body, &BookGotten)
 	if err != nil {
@@ -193,7 +202,6 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-	
 
 	ReturnedBook, err := BookGot.ReturnBook(id, a.DB)
 	if err != nil {
