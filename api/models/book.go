@@ -13,10 +13,13 @@ type Book struct {
 	gorm.Model
 	Subject string `gorm:"size:50;not null" json:"subject"`
 	//
+	ISBN      uint  `gorm:"size:20; not null" json:"isbn"`
 	IsRead    *bool `gorm:"size:50"          json:"isread"`
 	StudentID uint  //`gorm:"foreignKey:StudentID"`
 	TeacherID uint
 }
+
+type BookSubjects string
 
 // Prepare strips off white spaces
 func (b *Book) Prepare() {
@@ -99,7 +102,7 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 		return &Book{}, err
 	}
 	if *b.IsRead {
-		if db.Debug().Table("notifications").Where("book_subject= ? AND student_id=?", BookSubject, StudentId ).First(&notif).RowsAffected == 0 {
+		if db.Debug().Table("notifications").Where("book_subject= ? AND student_id=?", BookSubject, StudentId).First(&notif).RowsAffected == 0 {
 			db.Create(&Notification{
 				Message:     "Book is read",
 				StudentID:   b.StudentID,
@@ -122,14 +125,22 @@ func (b *Book) UpdateReadingProgress(id int, db *gorm.DB) (*Book, error) {
 	return b, nil
 }
 
-
 // func return book returns book from student
 func (b *Book) ReturnBook(id int, db *gorm.DB) (*Book, error) {
-	
+
 	if err := db.Debug().Table("books").Where("id=?", b.ID).Updates(map[string]interface{}{"is_read": "false", "student_id": 0}).Error; err != nil {
 		return &Book{}, err
 	}
-	
+
 	return b, nil
-	
+
+}
+
+// func AvailableBooks shows unassigned books
+func (b *Book) AvailableBooks(db *gorm.DB) (*[]BookSubjects, error) {
+	AssignedBooks := &[]BookSubjects{}
+	if err := db.Debug().Table("books").Select("subject").Where("student_id>?", 0).Find(AssignedBooks).Error; err != nil {
+		return nil, err
+	}
+	return AssignedBooks, nil
 }

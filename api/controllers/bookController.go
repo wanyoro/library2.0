@@ -211,3 +211,16 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 	resp["returned_book"] = ReturnedBook
 	responses.JSON(w, http.StatusOK, resp)
 }
+
+func (a *App) AvailableBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	books := models.Book{}
+	assignedBooks, err := books.AvailableBooks(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	response := map[string]*[]models.BookSubjects{"Assigned Books": assignedBooks}
+	responses.JSON(w, http.StatusOK, response)
+	//responses.JSON(w, http.StatusOK, availableBooks) // TODO: change this later on
+}
