@@ -69,5 +69,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/getnotifs", a.GetNotifs).Methods("GET")
 	s.HandleFunc("/returnbook/{id}", a.ReturnBook).Methods("PUT")
 	a.Router.HandleFunc("/booksread/{student_id}", a.BooksReadByStudent).Methods("GET")
-	a.Router.HandleFunc("/availablebooks", a.AvailableBooks).Methods("GET")
+	a.Router.HandleFunc("/assignedbooks", a.AssignedBooks).Methods("GET")
+	a.Router.HandleFunc("/unassignedbooks", a.UnassignedBooks).Methods("GET")
+	s.HandleFunc("/assignbook", a.AssignBook).Methods("PUT")
 }

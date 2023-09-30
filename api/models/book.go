@@ -13,13 +13,16 @@ type Book struct {
 	gorm.Model
 	Subject string `gorm:"size:50;not null" json:"subject"`
 	//
-	ISBN      uint  `gorm:"size:20; not null" json:"isbn"`
+	ISBN      uint  `gorm:"size:20;      " json:"isbn"`
 	IsRead    *bool `gorm:"size:50"          json:"isread"`
 	StudentID uint  //`gorm:"foreignKey:StudentID"`
 	TeacherID uint
 }
 
-type BookSubjects string
+type BookSubjects struct {
+	Subject string `gorm:references: "subject"`
+	ISBN    uint   `gorm:references: "isbn"`
+}
 
 // Prepare strips off white spaces
 func (b *Book) Prepare() {
@@ -92,13 +95,15 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	BookSubject := b.Subject
 	StudentId := b.StudentID
 	BookId := b.ID
+
 	notif := Notification{}
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		//Subject: b.Subject,
 
 		StudentID: b.StudentID,
 		IsRead:    b.IsRead,
-		TeacherID: b.TeacherID}).Error; err != nil {
+		TeacherID: b.TeacherID,
+		ISBN:      b.ISBN}).Error; err != nil {
 		return &Book{}, err
 	}
 	if *b.IsRead {
@@ -136,11 +141,21 @@ func (b *Book) ReturnBook(id int, db *gorm.DB) (*Book, error) {
 
 }
 
-// func AvailableBooks shows unassigned books
-func (b *Book) AvailableBooks(db *gorm.DB) (*[]BookSubjects, error) {
+// func AssignedBooks shows unavailable books
+func (b *Book) AssignedBooks(db *gorm.DB) (*[]BookSubjects, error) {
 	AssignedBooks := &[]BookSubjects{}
-	if err := db.Debug().Table("books").Select("subject").Where("student_id>?", 0).Find(AssignedBooks).Error; err != nil {
+	if err := db.Debug().Table("books").Select("subject, isbn").Where("student_id>?", 0).Find(AssignedBooks).Error; err != nil {
 		return nil, err
 	}
 	return AssignedBooks, nil
+}
+
+// func UnassignesBooks shows available books
+func (b *Book) UnassignedBooks(db *gorm.DB) (*[]BookSubjects, error) {
+	UnassignedBooks := &[]BookSubjects{}
+	if err := db.Debug().Table("books").Select("subject, isbn").Where("student_id<?", 1).Find(UnassignedBooks).Error; err != nil {
+		return nil, err
+	}
+	return UnassignedBooks, nil
+
 }

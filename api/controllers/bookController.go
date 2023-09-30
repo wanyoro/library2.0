@@ -212,10 +212,11 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, resp)
 }
 
-func (a *App) AvailableBooks(w http.ResponseWriter, r *http.Request) {
+func (a *App) AssignedBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	books := models.Book{}
-	assignedBooks, err := books.AvailableBooks(a.DB)
+
+	assignedBooks, err := books.AssignedBooks(a.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -223,4 +224,28 @@ func (a *App) AvailableBooks(w http.ResponseWriter, r *http.Request) {
 	response := map[string]*[]models.BookSubjects{"Assigned Books": assignedBooks}
 	responses.JSON(w, http.StatusOK, response)
 	//responses.JSON(w, http.StatusOK, availableBooks) // TODO: change this later on
+}
+
+func (a *App) UnassignedBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	books := models.Book{}
+	//ISBN := books.ISBN
+	unassignedBooks, err := books.UnassignedBooks(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	response := map[string]*[]models.BookSubjects{"UnassignedBooks": unassignedBooks}
+	responses.JSON(w, http.StatusOK, response)
+}
+
+//func AssignBook issues book to student
+func(a *App)AssignBook (w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{"Status":"Success", "Message":"Book Issued Succesfully"}
+	params:= mux.Vars(r)
+	id,_ := strconv.Atoi( params ["id"])
+	Book :=models.Book{}
+	
+	body, err:=
 }
