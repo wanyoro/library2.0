@@ -115,13 +115,6 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		resp["message"] = "book does not exist in database"
 		return
 	}
-	if BookGotten.StudentID != 0 {
-		//err= errors.New("this book is already assigned to student")
-		resp["message"] = "failed"
-		resp["message"] = "this book is already assigned to student"
-		responses.JSON(w, http.StatusBadRequest, resp)
-		return
-	}
 
 	err = json.Unmarshal(body, &BookGotten)
 	if err != nil {
@@ -239,13 +232,54 @@ func (a *App) UnassignedBooks(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, response)
 }
 
-//func AssignBook issues book to student
-func(a *App)AssignBook (w http.ResponseWriter, r *http.Request) {
+// func AssignBook issues book to student
+func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
-	var resp = map[string]interface{}{"Status":"Success", "Message":"Book Issued Succesfully"}
-	params:= mux.Vars(r)
-	id,_ := strconv.Atoi( params ["id"])
-	Book :=models.Book{}
-	
-	body, err:=
+	var resp = map[string]interface{}{"Status": "Success", "Message": "Book Issued Succesfully"}
+	var response = map[string]interface{}{"Status": "Failed", "Message": "this book is already assigned to student"}
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+	Book := models.Book{}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	bookGotten, err := Book.GetBookById(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	if bookGotten.StudentID != 0 {
+		//err= errors.New("this book is already assigned to student")
+		// response["message"] = "failed"
+		// response["message"] = "this book is already assigned to student"
+		responses.JSON(w, http.StatusBadRequest, response)
+		return
+	}
+
+	err = json.Unmarshal(body, &bookGotten)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	Book.Validate("issuebook")
+
+	issuedBook, err := bookGotten.IssueBook(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "check book"
+
+	}
+
+	resp["book"] = issuedBook
+	responses.JSON(w, http.StatusCreated, resp)
+
 }

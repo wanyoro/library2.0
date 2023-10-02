@@ -15,8 +15,8 @@ type Book struct {
 	//
 	ISBN      uint  `gorm:"size:20;      " json:"isbn"`
 	IsRead    *bool `gorm:"size:50"          json:"isread"`
-	StudentID uint  //`gorm:"foreignKey:StudentID"`
-	TeacherID uint
+	StudentID uint  `json :StudentID` //`gorm:"foreignKey:StudentID"`
+	TeacherID uint  `json: TeacherID`
 }
 
 type BookSubjects struct {
@@ -45,10 +45,11 @@ func (b *Book) Validate(action string) error {
 		}
 		return nil
 
-		// case "issuebook":
-		// 	if b.StudentID == 0 {
-		// 		return errors.New("please input student id")
-		// 	}
+	case "issuebook":
+		if b.StudentID == 0 {
+			return errors.New("please input student id")
+		}
+		return nil
 
 		// case "updatereadingprogress":
 		// 	if !b.IsRead {
@@ -100,10 +101,11 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
 		//Subject: b.Subject,
 
-		StudentID: b.StudentID,
-		IsRead:    b.IsRead,
-		TeacherID: b.TeacherID,
-		ISBN:      b.ISBN}).Error; err != nil {
+		//StudentID: b.StudentID,
+		IsRead: b.IsRead,
+		//TeacherID: b.TeacherID,
+		Subject: b.Subject,
+		ISBN:    b.ISBN}).Error; err != nil {
 		return &Book{}, err
 	}
 	if *b.IsRead {
@@ -158,4 +160,14 @@ func (b *Book) UnassignedBooks(db *gorm.DB) (*[]BookSubjects, error) {
 	}
 	return UnassignedBooks, nil
 
+}
+
+// func IssueBook assigns book to student
+func (b *Book) IssueBook(id int, db *gorm.DB) (*Book, error) {
+	if err := db.Debug().Table("books").Where("id=?", b.ID).Updates(Book{
+		StudentID: b.StudentID,
+		TeacherID: b.TeacherID}).Error; err != nil {
+		return &Book{}, err
+	}
+	return b, nil
 }
