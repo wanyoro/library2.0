@@ -32,16 +32,7 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// params := mux.Vars(r)
-	// id, err := strconv.Atoi(params["id"])
-	// dbbook, _ := book.GetBookById(id, a.DB)
-	// if dbbook != nil {
-	// 	resp["status"] = "failed"
-	// 	resp["message"] = "book number already exists"
-	// 	responses.ERROR(w, http.StatusBadRequest, err)
-	// 	return
-	// }
-
+	
 	book.Prepare()
 
 	book.Validate("createbook")
