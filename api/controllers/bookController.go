@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"time"
+
 	//"fmt"
 
 	"io"
@@ -32,7 +34,6 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	book.Prepare()
 
 	book.Validate("createbook")
@@ -41,6 +42,8 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	book.AvailableDate = time.Now()
+	book.Available = true
 	bookCreated, err := book.CreateBook(a.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -87,7 +90,7 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	var resp = map[string]interface{}{"status": "successful", "message": "book updated successfully"}
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+	id, err := strconv.Atoi(params["isbn"])
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -124,7 +127,7 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		resp["status"] = "Success"
 		resp["message"] = "Book updated successfully"
 	}
-	resp["book"] = UpdatedBook
+	resp["book"], _ = UpdatedBook.GetBookById(id, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
 }
 
@@ -167,7 +170,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		resp["status"] = "Success"
 		resp["message"] = "Book updated successfully"
 	}
-	resp["book"] = UpdatedBook
+	resp["book"], _ = UpdatedBook.GetBookById(id, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
 }
 
@@ -177,7 +180,7 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 	var resp = map[string]interface{}{"Status": "Successful", "Message": "Book returned successfully"}
 	params := mux.Vars(r)
 
-	id, _ := strconv.Atoi(params["id"])
+	id, _ := strconv.Atoi(params["isbn"])
 
 	book := models.Book{}
 
@@ -192,7 +195,7 @@ func (a *App) ReturnBook(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	resp["returned_book"] = ReturnedBook
+	resp["returned_book"], _ = ReturnedBook.GetBookById(id, a.DB)
 	responses.JSON(w, http.StatusOK, resp)
 }
 
@@ -229,7 +232,7 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 	var resp = map[string]interface{}{"Status": "Success", "Message": "Book Issued Succesfully"}
 	var response = map[string]interface{}{"Status": "Failed", "Message": "this book is already assigned to student"}
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
+	id, _ := strconv.Atoi(params["isbn"])
 	Book := models.Book{}
 
 	body, err := io.ReadAll(r.Body)
@@ -270,7 +273,7 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	resp["book"] = issuedBook
+	resp["book"], _ = issuedBook.GetBookById(id, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
 
 }

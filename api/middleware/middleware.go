@@ -23,7 +23,7 @@ func SetContentTypeMiddleware(next http.Handler) http.Handler {
 // AuthJwtVerify verify token and add userID to the request context
 func AuthJwtVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var resp = map[string]interface{}{"status": "failed", "message": "Missing authorization token please login"}
+		var resp = map[string]interface{}{"status": "failed", "message": "Permission denied please login"}
 
 		var header = r.Header.Get("Authorization")
 		header = strings.TrimSpace(header)

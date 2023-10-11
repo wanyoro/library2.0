@@ -19,7 +19,7 @@ type Book struct {
 	IsRead        *bool     `gorm:"size:50"          json:"isread"`
 	StudentID     uint      `json :"StudentID"` //`gorm:"foreignKey:StudentID"`
 	TeacherID     uint      `json: "TeacherID"`
-	Available     *bool     `json: "available"`
+	Available     bool      `json: "available"`
 	AvailableDate time.Time `json:"availableDate"`
 }
 
@@ -85,9 +85,9 @@ func (b *Book) CreateBook(db *gorm.DB) (*Book, error) {
 //func
 
 // func GetBook gets book from database
-func (b *Book) GetBookById(id int, db *gorm.DB) (*Book, error) {
+func (b *Book) GetBookById(isbn int, db *gorm.DB) (*Book, error) {
 	book := &Book{}
-	if err := db.Debug().Table("books").Where("id= ?", id).First(book).Error; err != nil {
+	if err := db.Debug().Table("books").Where("isbn= ?", isbn).First(book).Error; err != nil {
 		return nil, err
 	}
 	return book, nil
@@ -110,7 +110,7 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	BookId := b.ID
 
 	notif := Notification{}
-	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
+	if err := db.Debug().Table("books").Where("isbn =?", b.ISBN).Updates(Book{
 		//Subject: b.Subject,
 
 		//StudentID: b.StudentID,
@@ -147,7 +147,7 @@ func (b *Book) UpdateReadingProgress(id int, db *gorm.DB) (*Book, error) {
 // func return book returns book from student
 func (b *Book) ReturnBook(id int, db *gorm.DB) (*Book, error) {
 
-	if err := db.Debug().Table("books").Where("id=?", b.ID).Updates(map[string]interface{}{"is_read": false, "student_id": 0, "available": true, "available_date": time.Now()}).Error; err != nil {
+	if err := db.Debug().Table("books").Where("isbn=?", b.ISBN).Updates(map[string]interface{}{"is_read": false, "student_id": 0, "available": true, "available_date": time.Now()}).Error; err != nil {
 		return &Book{}, err
 	}
 
@@ -178,7 +178,8 @@ func (b *Book) UnassignedBooks(db *gorm.DB) (*[]BookSubjects, error) {
 func (b *Book) IssueBook(id int, db *gorm.DB) (*Book, error) {
 	currentTime := time.Now()
 	returnDate := currentTime.AddDate(0, 0, 15)
-	if err := db.Debug().Table("books").Where("id=?", b.ID).Updates(map[string]interface{}{
+	if err := db.Debug().Table("books").Where("isbn=?", b.ISBN).Updates(map[string]interface{}{
+		"is_read":        "false",
 		"student_id":     b.StudentID,
 		"teacher_id":     b.TeacherID,
 		"available":      "false",
