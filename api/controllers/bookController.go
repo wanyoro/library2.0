@@ -210,13 +210,12 @@ func (a *App) AssignedBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	response := map[string]*[]models.BookSubjects{"Assigned Books": assignedBooks}
 	responses.JSON(w, http.StatusOK, response)
-	//responses.JSON(w, http.StatusOK, availableBooks) // TODO: change this later on
+	
 }
 
 func (a *App) UnassignedBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	books := models.Book{}
-	//ISBN := books.ISBN
 	unassignedBooks, err := books.UnassignedBooks(a.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
@@ -247,9 +246,6 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if bookGotten.StudentID != 0 {
-		//err= errors.New("this book is already assigned to student")
-		// response["message"] = "failed"
-		// response["message"] = "this book is already assigned to student"
 		responses.JSON(w, http.StatusBadRequest, response)
 		return
 	}

@@ -63,10 +63,7 @@ func (b *Book) Validate(action string) error {
 		}
 		return nil
 
-		// case "updatereadingprogress":
-		// 	if !b.IsRead {
-		// 		return errors.New("please update reading progress")
-		// 	}
+		
 	}
 	return nil
 
@@ -74,7 +71,7 @@ func (b *Book) Validate(action string) error {
 
 // func CreateBook creates book
 func (b *Book) CreateBook(db *gorm.DB) (*Book, error) {
-	//var err error
+	
 	err := db.Debug().Create(&b).Error
 	if err != nil {
 		return &Book{}, err

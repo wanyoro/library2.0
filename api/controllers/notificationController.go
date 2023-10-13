@@ -40,11 +40,6 @@ func (a *App) BooksReadByStudent(w http.ResponseWriter, r *http.Request) {
 		responses.JSON(w, http.StatusUnprocessableEntity, err)
 	}
 
-	// NotifGot, err := notif.GetNotifById(id, a.DB)
-	// if err!= nil{
-	// 	responses.ERROR(w, http.StatusInternalServerError,err )
-	// 	return
-	// }
 
 	notifs, err := notif.GetReadBooks(student_id, a.DB)
 	if err != nil {
