@@ -82,3 +82,12 @@ func (t *Teacher) GetTeacher(db *gorm.DB) (*Teacher, error) {
 	}
 	return account, nil
 }
+
+//func indAllTeachers gets all teachers 
+func (t *Teacher) FindAllTeachers(db *gorm.DB) (*[]Teacher, error){
+	accounts := &[]Teacher{}
+	if err := db.Debug().Table("teachers").Find(&accounts).Error;err!= nil{
+		return nil, err
+	}
+	return accounts, nil
+}

@@ -72,4 +72,5 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/assignedbooks", a.AssignedBooks).Methods("GET")
 	a.Router.HandleFunc("/unassignedbooks", a.UnassignedBooks).Methods("GET")
 	s.HandleFunc("/assignbook/{isbn}", a.AssignBook).Methods("PUT")
+	s.HandleFunc("/getteachers", a.GetTeachers).Methods("GET")
 }

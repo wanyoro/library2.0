@@ -111,3 +111,14 @@ func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, resp)
 
 }
+
+func (a *App) GetTeachers(w http.ResponseWriter, r *http.Request) {
+	var resp = map[string]interface{}{
+		"status": "success",
+	}
+	teacher := models.Teacher{}
+	teachers, _ := teacher.FindAllTeachers(a.DB)
+	resp["teachers"] = teachers
+	responses.JSON(w, http.StatusOK, resp)
+
+}
