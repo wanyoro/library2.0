@@ -113,6 +113,7 @@ func (a *App) TeacherLogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) GetTeachers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
 	var resp = map[string]interface{}{
 		"status": "success",
 	}
