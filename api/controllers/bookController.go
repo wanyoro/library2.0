@@ -210,7 +210,7 @@ func (a *App) AssignedBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	response := map[string]*[]models.BookSubjects{"Assigned Books": assignedBooks}
 	responses.JSON(w, http.StatusOK, response)
-	
+
 }
 
 func (a *App) UnassignedBooks(w http.ResponseWriter, r *http.Request) {
@@ -272,4 +272,19 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 	resp["book"], _ = issuedBook.GetBookById(id, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
 
+}
+
+func (a *App) PopulateBooks(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["studentId"])
+	books := models.Book{}
+	loadedbooks, err := books.PopulateBooks(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, loadedbooks)
+
+	//books:=models.PopulateBooks()
 }

@@ -17,13 +17,17 @@ type Student struct {
 	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
 	Password    string `gorm:"size:100;not null"              json:"password"`
 	Books       []Book `json:"books" `
-	Notification Notification
-	
+	//Notification Notification
+
 }
 
 type StudentAndBooks struct {
 	StudentUsername string `gorm:"references:Username"`
 	BookCount       uint
+}
+
+type book_count struct {
+	bookCount uint
 }
 
 // hashPassword hash user input password

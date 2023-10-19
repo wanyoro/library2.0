@@ -73,4 +73,13 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/unassignedbooks", a.UnassignedBooks).Methods("GET")
 	s.HandleFunc("/assignbook/{isbn}", a.AssignBook).Methods("PUT")
 	s.HandleFunc("/getteachers", a.GetTeachers).Methods("GET")
-}
+	//a.Router.HandleFunc("/deleteteacher/{email}", a.DeleteTeacher).Methods("DELETE")
+	//a.Router.HandleFunc("/deletebook/{isbn}", a.DeleteBook).Methods("DELETE")
+	//a.Router.HandleFunc("/deletenotifications", a.DeleteAllNotifications).Methods("DELETE")
+	//a.Router.HandleFunc("/deletestudent/{email}", a.DeleteStudent).Methods("DELETE")
+	//a.Router.HandleFunc("/resetpassword/{email}", a.ResetPassword).Methods("PUT")
+	//a.Router.HandleFunc("/changepasswd/{oldpw}/{newpw}", a.ChangePasswd).Methods("PUT")
+	//a.Router.HandleFunc("/sendmail", mailController.SendEmail)
+	//a.Router.HandleFunc("/testauth", middleware.TestAuthentication)
+	a.Router.HandleFunc("/populatebooks/{student_id}", a.PopulateBooks).Methods("GET")
+}   

@@ -10,10 +10,10 @@ import (
 
 type Teacher struct {
 	gorm.Model
-	Username     string `gorm:"size:50;unique_index;not null"    json:"username"`
-	Email        string `gorm:"size:100;unique_index;not null"   json:"email"`
-	Password     string `gorm:"size:100;not null"                json:"password"`
-	Notification []Notification
+	Username string `gorm:"size:50;unique_index;not null"    json:"username"`
+	Email    string `gorm:"size:100;unique_index;not null"   json:"email"`
+	Password string `gorm:"size:100;not null"                json:"password"`
+	//Notification []Notification
 }
 
 // func BeforeSave hashes teacher password
@@ -46,20 +46,20 @@ func (t *Teacher) Validate(action string) error {
 		}
 		return nil
 
-	// default: //all fields required
-	// 	if t.Username == "" {
-	// 		return errors.New("please enter username")
-	// 	}
-	// 	if t.Email == "" {
-	// 		return errors.New("please enter email")
-	// 	}
-	// 	if t.Password == "" {
-	// 		return errors.New("please enter password")
-	// 	}
-	// 	if err := checkmail.ValidateFormat(t.Email); err != nil {
-	// 		return errors.New("invalid email")
-	// 	}
-	// 	return nil
+		// default: //all fields required
+		// 	if t.Username == "" {
+		// 		return errors.New("please enter username")
+		// 	}
+		// 	if t.Email == "" {
+		// 		return errors.New("please enter email")
+		// 	}
+		// 	if t.Password == "" {
+		// 		return errors.New("please enter password")
+		// 	}
+		// 	if err := checkmail.ValidateFormat(t.Email); err != nil {
+		// 		return errors.New("invalid email")
+		// 	}
+		// 	return nil
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func (t *Teacher) Validate(action string) error {
 // func Saveteacher adds teacher to database
 func (t *Teacher) SaveTeacher(db *gorm.DB) (*Teacher, error) {
 	//var err error
-	err:= db.Debug().Create(&t).Error
+	err := db.Debug().Create(&t).Error
 	if err != nil {
 		return &Teacher{}, err
 	}
@@ -83,10 +83,10 @@ func (t *Teacher) GetTeacher(db *gorm.DB) (*Teacher, error) {
 	return account, nil
 }
 
-//func indAllTeachers gets all teachers 
-func (t *Teacher) FindAllTeachers(db *gorm.DB) (*[]Teacher, error){
+// func indAllTeachers gets all teachers
+func (t *Teacher) FindAllTeachers(db *gorm.DB) (*[]Teacher, error) {
 	accounts := &[]Teacher{}
-	if err := db.Debug().Table("teachers").Find(&accounts).Error;err!= nil{
+	if err := db.Debug().Table("teachers").Find(&accounts).Error; err != nil {
 		return nil, err
 	}
 	return accounts, nil

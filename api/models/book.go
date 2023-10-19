@@ -63,7 +63,6 @@ func (b *Book) Validate(action string) error {
 		}
 		return nil
 
-		
 	}
 	return nil
 
@@ -71,7 +70,7 @@ func (b *Book) Validate(action string) error {
 
 // func CreateBook creates book
 func (b *Book) CreateBook(db *gorm.DB) (*Book, error) {
-	
+
 	err := db.Debug().Create(&b).Error
 	if err != nil {
 		return &Book{}, err
@@ -88,6 +87,19 @@ func (b *Book) GetBookById(isbn int, db *gorm.DB) (*Book, error) {
 		return nil, err
 	}
 	return book, nil
+}
+
+// func PopulateBooks adds books assigned to student
+func (b *Book) PopulateBooks(id int, db *gorm.DB) (*[]Book, error) {
+	books := []Book{}
+	students := Student{}
+	var count int64
+	if err := db.Debug().Model(&students).Preload("students").
+		Joins("inner join books on books.student_id= students.id").
+		Count(&count).Where("id= ?", students.ID).Error; err != nil {
+		return nil, err
+	}
+	return &books, nil
 }
 
 // func GetBooks gets all books from database
