@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strconv"
 
+	//"errors"
+
 	"github.com/gorilla/mux"
 	"lib2.0/api/models"
 	"lib2.0/api/responses"
@@ -51,26 +53,6 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 	resp["book"] = bookCreated
 	responses.JSON(w, http.StatusCreated, resp)
-}
-
-// func GetBookById gets book with specific id
-func (a *App) GetBookById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "Application/json")
-	book := models.Book{}
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
-
-	bookGotten, err := book.GetBookById(id, a.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
-	responses.JSON(w, http.StatusOK, bookGotten)
-
 }
 
 // func GetBooks get all books from database
@@ -275,8 +257,13 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) PopulateBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["studentId"])
+	id, err := strconv.Atoi(params["student_id"])
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
 	books := models.Book{}
 	loadedbooks, err := books.PopulateBooks(id, a.DB)
 	if err != nil {
@@ -287,4 +274,24 @@ func (a *App) PopulateBooks(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, loadedbooks)
 
 	//books:=models.PopulateBooks()
+}
+
+// func GetBookById gets book with specific id
+func (a *App) GetBookById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	book := models.Book{}
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	bookGotten, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, bookGotten)
+
 }
