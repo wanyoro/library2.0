@@ -2,9 +2,14 @@ package controllers
 
 import (
 	"encoding/json"
+	//"errors"
 	"io"
 	"net/http"
 
+	//"strconv"
+	"strings"
+
+	"github.com/gorilla/mux"
 	"lib2.0/api/models"
 	"lib2.0/api/responses"
 	"lib2.0/utils"
@@ -122,4 +127,20 @@ func (a *App) GetTeachers(w http.ResponseWriter, r *http.Request) {
 	resp["teachers"] = teachers
 	responses.JSON(w, http.StatusOK, resp)
 
+}
+
+func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{
+		"status": "success",
+	}
+	params := mux.Vars(r)
+	email := (params["email"])
+	// if err!= nil{
+	// 	responses.ERROR(w, http.StatusBadRequest, errors.New("invalid email"))
+	// }
+	teacher := models.Teacher{}
+	teachers, _ := teacher.RemoveTeacher(email, a.DB)
+	resp["teacher successfully removed"] = strings.Split(teachers, "REMOVED")
+	responses.JSON(w, http.StatusOK, resp)
 }
