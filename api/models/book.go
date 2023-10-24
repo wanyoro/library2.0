@@ -90,16 +90,14 @@ func (b *Book) GetBookById(isbn int, db *gorm.DB) (*Book, error) {
 }
 
 // func PopulateBooks adds books assigned to student
-func (b *Book) PopulateBooks(studentID int, db *gorm.DB) (*[]Book, error) {
-	books := []Book{}
+func (b *Book) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
+	//books := []Book{}
 	students := Student{}
-	var count int64
-	if err := db.Debug().Model(&students).Preload("students").Where("students.id= ?", studentID).
-		Joins("inner join books on books.student_id= students.id").
-		Count(&count).Find(&books).Error; err != nil {
+	//var count int64
+	if err := db.Debug().Raw("select students.id,students.created_at,students.updated_at,students.deleted_at,students.username,students.phone_number,students.email,students.password, count(*) as books FROM students inner join books on books.student_id= students.id WHERE students.id= ? AND students.deleted_at IS NULL group by students.id", studentID).Scan(&students).Error; err != nil {
 		return nil, err
 	}
-	return &books, nil
+	return &students, nil
 }
 
 // func GetBooks gets all books from database

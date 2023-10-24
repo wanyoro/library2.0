@@ -16,7 +16,7 @@ type Student struct {
 	PhoneNumber int    `gorm:"size:20;not null"               json:"phonenumber"`
 	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
 	Password    string `gorm:"size:100;not null"              json:"password"`
-	Books       []Book `json:"books" `
+	Books       int    `json:"books" `
 	//Notification Notification
 
 }
@@ -165,6 +165,17 @@ func (s *Student) CountBooks(db *gorm.DB) (*[]StudentAndBooks, error) {
 	//var count int64
 	if err := db.Debug().Raw("select students.username as student_username ,count(books.subject) as book_count from students inner join books on books.student_id= students.id group by students.id").Scan(&students).Error; err != nil {
 		return &[]StudentAndBooks{}, err
+	}
+	return &students, nil
+}
+
+// func PopulateBooks adds books assigned to student
+func (s *Student) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
+	//books := []Book{}
+	students := Student{}
+	//var count int64
+	if err := db.Debug().Raw("select students.id,students.created_at,students.updated_at,students.deleted_at,students.username,students.phone_number,students.email,students.password, count(*) as books FROM students inner join books on books.student_id= students.id WHERE students.id= ? AND students.deleted_at IS NULL group by students.id", studentID).Scan(&students).Error; err != nil {
+		return nil, err
 	}
 	return &students, nil
 }

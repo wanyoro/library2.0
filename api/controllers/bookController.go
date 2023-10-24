@@ -256,25 +256,7 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (a *App) PopulateBooks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "Application/json")
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["student_id"])
-	if err != nil {
-		responses.ERROR(w, http.StatusNotFound, err)
-		return
-	}
-	books := models.Book{}
-	loadedbooks, err := books.PopulateBooks(id, a.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusNotFound, err)
-		return
-	}
 
-	responses.JSON(w, http.StatusOK, loadedbooks)
-
-	//books:=models.PopulateBooks()
-}
 
 // func GetBookById gets book with specific id
 func (a *App) GetBookById(w http.ResponseWriter, r *http.Request) {
