@@ -93,9 +93,18 @@ func (t *Teacher) FindAllTeachers(db *gorm.DB) (*[]Teacher, error) {
 }
 
 // func RemoveTeacher removes teacher from db
-func (t *Teacher) RemoveTeacher(email string, db *gorm.DB) (string, error) {
-	if err := db.Debug().Select("Teacher").Where("email=?", email).Delete(&Teacher{}).Error; err != nil {
+func (t *Teacher) RemoveTeacher(username string, db *gorm.DB) (string, error) {
+	if err := db.Debug().Select("Teacher").Where("username ILIKE ?", username).Delete(&Teacher{}).Error; err != nil {
 		return "Teacher Deleted", err
 	}
 	return "", nil
+}
+
+// func GetTeacherByUsername gets specific teacher by their username
+func (t *Teacher) GetTeacherByUsername(username string, db *gorm.DB) (*Teacher, error) {
+	account := &Teacher{}
+	if err := db.Debug().Table("teachers").Where("username ILIKE ?", username).First(account).Error; err != nil {
+		return nil, err
+	}
+	return account, nil
 }

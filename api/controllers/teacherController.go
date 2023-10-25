@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	//"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -135,12 +136,16 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		"status": "success",
 	}
 	params := mux.Vars(r)
-	email := (params["email"])
-	// if err!= nil{
-	// 	responses.ERROR(w, http.StatusBadRequest, errors.New("invalid email"))
-	// }
-	teacher := models.Teacher{}
-	teachers, _ := teacher.RemoveTeacher(email, a.DB)
+	username := (params["username"])
+	account := models.Teacher{}
+	teacherGot, _ := account.GetTeacherByUsername(username, a.DB)
+	if teacherGot == nil {
+		resp["status"] = "failed"
+		resp["message"] = fmt.Sprintf("%v does not exist", username)
+		return
+	}
+	//teacher := models.Teacher{}
+	teachers, _ := teacherGot.RemoveTeacher(username, a.DB)
 	resp["teacher successfully removed"] = strings.Split(teachers, "REMOVED")
 	responses.JSON(w, http.StatusOK, resp)
 }

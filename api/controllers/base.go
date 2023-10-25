@@ -73,7 +73,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/unassignedbooks", a.UnassignedBooks).Methods("GET")
 	s.HandleFunc("/assignbook/{isbn}", a.AssignBook).Methods("PUT")
 	s.HandleFunc("/getteachers", a.GetTeachers).Methods("GET")
-	a.Router.HandleFunc("/deleteteacher/{email}", a.DeleteTeacher).Methods("DELETE")
+	a.Router.HandleFunc("/deleteteacher/{username}", a.DeleteTeacher).Methods("DELETE")
 	//a.Router.HandleFunc("/deletebook/{isbn}", a.DeleteBook).Methods("DELETE")
 	//a.Router.HandleFunc("/deletenotifications", a.DeleteAllNotifications).Methods("DELETE")
 	//a.Router.HandleFunc("/deletestudent/{email}", a.DeleteStudent).Methods("DELETE")
