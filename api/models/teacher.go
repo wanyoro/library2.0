@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	//"fmt"
 	"strings"
 
 	//"github.com/badoux/checkmail"
@@ -46,6 +47,8 @@ func (t *Teacher) Validate(action string) error {
 		}
 		return nil
 
+	
+
 		// default: //all fields required
 		// 	if t.Username == "" {
 		// 		return errors.New("please enter username")
@@ -59,7 +62,7 @@ func (t *Teacher) Validate(action string) error {
 		// 	if err := checkmail.ValidateFormat(t.Email); err != nil {
 		// 		return errors.New("invalid email")
 		// 	}
-		// 	return nil
+		// return nil
 	}
 	return nil
 }

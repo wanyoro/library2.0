@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -48,4 +49,15 @@ func (a *App) BooksReadByStudent(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, notifs)
 
+}
+
+func (a *App) DeleteAllNotifications (w http.ResponseWriter, r*http.Request){
+	w.Header().Set("Content-Type","Application/json")
+	notif:=models.Notification{}
+	err:=notif.DeleteAllNotifications(a.DB)
+	if err!=nil{
+		responses.ERROR(w,http.StatusInternalServerError, fmt.Errorf("Couldn't delete the notifications"))
+		return
+	}
+	responses.JSON(w,http.StatusNoContent,fmt.Sprint("Deleted Successfully!"))
 }

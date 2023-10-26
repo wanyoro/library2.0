@@ -195,3 +195,11 @@ func (b *Book) IssueBook(id int, db *gorm.DB) (*Book, error) {
 	}
 	return b, nil
 }
+
+// func DeleteBook removes books from db
+func (b *Book) DeleteBookByISBN(isbn int, db *gorm.DB) *Book {
+	if err := db.Debug().Where("isbn=?", isbn).Delete(&Book{}).Error; err != nil {
+		return &Book{} //fmt.Sprintf("Could not delete Book with id %v", isbn)
+	}
+	return b //fmt.Sprintf("Deleted Book with id %v", isbn)
+}

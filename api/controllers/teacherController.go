@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	//"errors"
+
 	"fmt"
 	"io"
 	"net/http"
@@ -34,22 +35,16 @@ func (a *App) TeacherSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teach, _ := teacher.GetTeacher(a.DB)
+	teach, _ := teacher.GetTeacherByUsername(teacher.Username, a.DB)
 	if teach != nil {
-		resp["status"] = "unsusccesful"
-		resp["message"] = "teacher already exists please login"
-		responses.ERROR(w, http.StatusBadRequest, err)
+		
+		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("%v already exists", teacher.Username))
 		return
 	}
 
 	teacher.Prepare()
 	teacher.BeforeSave()
 
-	err = teacher.Validate("")
-	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
 
 	teacherCreated, err := teacher.SaveTeacher(a.DB)
 	if err != nil {

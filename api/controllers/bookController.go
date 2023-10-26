@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	//"fmt"
@@ -256,8 +257,6 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 
 }
 
-
-
 // func GetBookById gets book with specific id
 func (a *App) GetBookById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
@@ -276,4 +275,35 @@ func (a *App) GetBookById(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, bookGotten)
 
+}
+
+func (a *App) DeleteBook(w http.ResponseWriter, r *http.Request) {
+	// var resp = map[string]interface{}{
+	// 	"status":"Successful",
+	// }
+	w.Header().Set("Content-Type", "Application/json")
+	var params = mux.Vars(r)
+	isbn, err := strconv.Atoi(params["isbn"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("Invalid ISBN"))
+		return
+	}
+
+	books := models.Book{}
+	getBook, err := books.GetBookById(isbn, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, fmt.Errorf("No Book Found With This ID %v ", isbn))
+		return
+	}
+	if !getBook.Available {
+		responses.ERROR(w, http.StatusConflict, fmt.Errorf("Book of isbn %v is issued please return book first", getBook.ISBN))
+		return
+	}
+
+	deletedbook := getBook.DeleteBookByISBN(isbn, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, fmt.Sprintf("Book of isbn %v, successfully deleted", deletedbook.ISBN))
 }

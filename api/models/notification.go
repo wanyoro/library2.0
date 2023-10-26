@@ -51,3 +51,9 @@ func (n *Notification) GetReadBooks(student_id int, db *gorm.DB) (*[]Booksubject
 // 	notif := Notification{}
 // 	if err:= db.Debug().
 // }
+
+// func DeleteAllNotifications removes all notifs from db
+func (n *Notification) DeleteAllNotifications(db *gorm.DB) *Notification {
+	db.Debug().Delete(&Notification{})
+	return n
+}
