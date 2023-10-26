@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -200,19 +201,18 @@ func (a *App) GetStudentBookCount(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, bookcount)
 }
 
-//func GetStudentById get specific student id
-func (a *App) GetStudentById (w http.ResponseWriter, r*http.Request){
+// func GetStudentById get specific student id
+func (a *App) GetStudentById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	studentGot := models.Student{}
-	params:= mux.Vars(r)
+	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
-	if err!= nil{
+	if err != nil {
 		responses.JSON(w, http.StatusBadRequest, err)
 	}
 
-	
-	studentbyid, err:= studentGot.GetStudentById(id, a.DB)
-	if err!= nil{
+	studentbyid, err := studentGot.GetStudentById(id, a.DB)
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -239,3 +239,13 @@ func (a *App) PopulateBooks(w http.ResponseWriter, r *http.Request) {
 	//books:=models.PopulateBooks()
 }
 
+func (a *App) DeleteStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+	students := models.Student{}
+	student, _ := students.GetStudentById(id, a.DB)
+
+	studentDeleted := student.DeleteStudent(id, a.DB)
+	responses.JSON(w, http.StatusOK, fmt.Sprintf("Student of username %v and ID %v deleted successfully", studentDeleted.Username, studentDeleted.ID))
+}

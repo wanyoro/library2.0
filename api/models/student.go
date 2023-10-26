@@ -180,4 +180,10 @@ func (s *Student) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
 	return &students, nil
 }
 
-
+// func DeleteStudent removes student from database
+func (s *Student) DeleteStudent(id int, db *gorm.DB) *Student {
+	if err := db.Debug().Table("students").Where("id= ?", id).Delete(&Student{}).Error; err != nil {
+		return &Student{}
+	}
+	return s
+}
