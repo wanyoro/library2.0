@@ -243,9 +243,32 @@ func (a *App) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
+	
 	students := models.Student{}
 	student, _ := students.GetStudentById(id, a.DB)
 
 	studentDeleted := student.DeleteStudent(id, a.DB)
 	responses.JSON(w, http.StatusOK, fmt.Sprintf("Student of username %v and ID %v deleted successfully", studentDeleted.Username, studentDeleted.ID))
+}
+
+func (a *App) ResetPassword (w http.ResponseWriter, r*http.Request){
+	w.Header().Set("Content-Type","Application/json")
+	params:= mux.Vars(r)
+	email := params["email"]
+	user:= models.Student{}
+	
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err!=nil{
+		responses.ERROR(w,http.StatusNotAcceptable,errors.New("Error while decoding the request body"))
+		return
+	}
+
+	student:= user.GetStudentByEmail(email, a.DB)
+	resetedUser:= student.ResetPassword(a.DB)
+	if err!=nil{
+		responses.ERROR(w,http.StatusInternalServerError,fmt.Errorf("Failed to reset password"))
+		return
+	}
+	responses.JSON(w,http.StatusCreated,resetedUser)
+
 }

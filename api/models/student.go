@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"strings"
+	"log"
 
 	"github.com/badoux/checkmail"
 	"golang.org/x/crypto/bcrypt"
@@ -12,11 +13,12 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username    string `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber int    `gorm:"size:20;not null"               json:"phonenumber"`
-	Email       string `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password    string `gorm:"size:100;not null"              json:"password"`
-	Books       int    `json:"books" `
+	Username      string  `gorm:"size:100;not null"              json:"username"`
+	PhoneNumber   int     `gorm:"size:20;not null"               json:"phonenumber"`
+	Email         string  `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password      string  `gorm:"size:100;not null"              json:"password"`
+	Books         *[]Book `json:"books"`
+	BooksAssigned int     `json:"booksassigned" `
 	//Notification Notification
 
 }
@@ -127,6 +129,13 @@ func (s *Student) GetStudentById(id int, db *gorm.DB) (*Student, error) {
 	return user, nil
 }
 
+//func GetStudentByEmail gets student using their email
+func (s *Student) GetStudentByEmail (email string, db *gorm.DB) (*Student){
+	student := &Student{}
+	db.Find(&student, "email = ?", email)
+	return student
+}
+
 // function UpdateUser updates specific user
 func (s *Student) UpdateStudent(id int, db *gorm.DB) (*Student, error) {
 	if err := db.Debug().Table("students").Where("id= ?", s.ID).Updates(Student{
@@ -174,7 +183,7 @@ func (s *Student) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
 	//books := []Book{}
 	students := Student{}
 	//var count int64
-	if err := db.Debug().Raw("select students.id,students.created_at,students.updated_at,students.deleted_at,students.username,students.phone_number,students.email,students.password, count(*) as books FROM students inner join books on books.student_id= students.id WHERE students.id= ? AND students.deleted_at IS NULL group by students.id", studentID).Scan(&students).Error; err != nil {
+	if err := db.Debug().Raw("select students.id,students.created_at,students.updated_at,students.deleted_at,students.username,students.phone_number,students.email,students.password, count(*) as books_assigned FROM students inner join books on books.student_id= students.id WHERE students.id= ? AND students.deleted_at IS NULL group by students.id", studentID).Scan(&students).Error; err != nil {
 		return nil, err
 	}
 	return &students, nil
@@ -187,3 +196,12 @@ func (s *Student) DeleteStudent(id int, db *gorm.DB) *Student {
 	}
 	return s
 }
+
+//func ResetPassword sends request to db for user to reset password
+func (s *Student) ResetPassword ( db *gorm.DB) *Student{
+	if err := db.Debug().Model(&Student{}).UpdateColumn("password", "newpass").Error; err != nil {
+		log.Fatalf("Failed to update password: %v\n", err)
+		return &Student{}
+	}
+	return s
+} 
