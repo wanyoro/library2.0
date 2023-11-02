@@ -243,32 +243,37 @@ func (a *App) DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
-	
+
 	students := models.Student{}
-	student, _ := students.GetStudentById(id, a.DB)
+	//books := models.Book{}
+	student, _ := students.PopulateBooks(id, a.DB)
+	if student.BooksAssigned != 0 {
+		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("%v owns %v books . Return book first to delete", student.Username, student.BooksAssigned))
+		return
+	}
 
 	studentDeleted := student.DeleteStudent(id, a.DB)
 	responses.JSON(w, http.StatusOK, fmt.Sprintf("Student of username %v and ID %v deleted successfully", studentDeleted.Username, studentDeleted.ID))
 }
 
-func (a *App) ResetPassword (w http.ResponseWriter, r*http.Request){
-	w.Header().Set("Content-Type","Application/json")
-	params:= mux.Vars(r)
+func (a *App) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	params := mux.Vars(r)
 	email := params["email"]
-	user:= models.Student{}
-	
+	user := models.Student{}
+
 	err := json.NewDecoder(r.Body).Decode(&user)
-	if err!=nil{
-		responses.ERROR(w,http.StatusNotAcceptable,errors.New("Error while decoding the request body"))
+	if err != nil {
+		responses.ERROR(w, http.StatusNotAcceptable, errors.New("Error while decoding the request body"))
 		return
 	}
 
-	student:= user.GetStudentByEmail(email, a.DB)
-	resetedUser:= student.ResetPassword(a.DB)
-	if err!=nil{
-		responses.ERROR(w,http.StatusInternalServerError,fmt.Errorf("Failed to reset password"))
+	student := user.GetStudentByEmail(email, a.DB)
+	resetedUser := student.ResetPassword(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, fmt.Errorf("Failed to reset password"))
 		return
 	}
-	responses.JSON(w,http.StatusCreated,resetedUser)
+	responses.JSON(w, http.StatusCreated, resetedUser)
 
 }
