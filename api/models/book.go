@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	//"strconv"
 	"strings"
 
 	"time"
@@ -15,7 +16,7 @@ type Book struct {
 	gorm.Model
 	Subject string `gorm:"size:50;not null" json:"subject"`
 	//
-	ISBN          uint      `gorm:"size:20;      " json:"isbn"`
+	ISBN          uint      `gorm:"size:20;unique" json:"isbn"`
 	IsRead        *bool     `gorm:"size:50"          json:"isread"`
 	StudentID     uint      `json :"StudentID"` //`gorm:"foreignKey:StudentID"`
 	TeacherID     uint      `json: "TeacherID"`
@@ -50,6 +51,9 @@ func (b *Book) Validate(action string) error {
 			return errors.New("please input subject")
 		}
 		return nil
+
+		//isbn:= parseint(b.ISBN)
+		//if b.ISBN ==strings.Contains(isbn,  )
 
 	case "updatebook":
 		if b.Subject == "" {

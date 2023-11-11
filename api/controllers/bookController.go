@@ -30,6 +30,7 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
+	//bookisbn, err := book.GetBookById()
 
 	err = json.Unmarshal(body, &book)
 	if err != nil {
