@@ -3,8 +3,8 @@ package models
 import (
 	"errors"
 
-	"strings"
 	"log"
+	"strings"
 
 	"github.com/badoux/checkmail"
 	"golang.org/x/crypto/bcrypt"
@@ -129,8 +129,8 @@ func (s *Student) GetStudentById(id int, db *gorm.DB) (*Student, error) {
 	return user, nil
 }
 
-//func GetStudentByEmail gets student using their email
-func (s *Student) GetStudentByEmail (email string, db *gorm.DB) (*Student){
+// func GetStudentByEmail gets student using their email
+func (s *Student) GetStudentByEmail(email string, db *gorm.DB) *Student {
 	student := &Student{}
 	db.Find(&student, "email = ?", email)
 	return student
@@ -197,11 +197,11 @@ func (s *Student) DeleteStudent(id int, db *gorm.DB) *Student {
 	return s
 }
 
-//func ResetPassword sends request to db for user to reset password
-func (s *Student) ResetPassword ( db *gorm.DB) *Student{
+// func ResetPassword sends request to db for user to reset password
+func (s *Student) ResetPassword(db *gorm.DB) *Student {
 	if err := db.Debug().Model(&Student{}).UpdateColumn("password", "newpass").Error; err != nil {
 		log.Fatalf("Failed to update password: %v\n", err)
 		return &Student{}
 	}
 	return s
-} 
+}
