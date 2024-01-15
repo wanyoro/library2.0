@@ -78,8 +78,10 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/deletenotifications", a.DeleteAllNotifications).Methods("DELETE")
 	a.Router.HandleFunc("/deletestudent/{id}", a.DeleteStudent).Methods("DELETE")
 	a.Router.HandleFunc("/resetpassword/{email}", a.ResetPassword).Methods("PUT")
-	//a.Router.HandleFunc("/changepasswd/{oldpw}/{newpw}", a.ChangePasswd).Methods("PUT")
+	//a.Router.HandleFunc("/changepasswd/{email}", a.ChangePasswd).Methods("PUT")
 	//a.Router.HandleFunc("/sendmail", mailController.SendEmail)
 	//a.Router.HandleFunc("/testauth", middleware.TestAuthentication)
 	a.Router.HandleFunc("/populatebooks/{student_id}", a.PopulateBooks).Methods("GET")
+	//s.HandleFunc("/forgotpassword/{email}", a.ForgotPassword).Methods("POST")
+	s.HandleFunc("/resetpassword/:resetToken", a.ResetPassword).Methods("PATCH")
 }   

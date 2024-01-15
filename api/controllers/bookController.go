@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	//"time"
 
 	//"fmt"
 
@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"lib2.0/api/models"
 	"lib2.0/api/responses"
+	//"lib2.0/redis"
 )
 
 // func CreateBook adds a book to the database
@@ -46,7 +47,7 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book.AvailableDate = time.Now()
+	//book.AvailableDate = time.Now()
 	book.Available = true
 	bookCreated, err := book.CreateBook(a.DB)
 	if err != nil {
@@ -60,6 +61,8 @@ func (a *App) CreateBook(w http.ResponseWriter, r *http.Request) {
 // func GetBooks get all books from database
 func (a *App) GetBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
+	//cachedBooks, err := redis.RedisClient.Get(context.Background(), )
+	
 	booksGotten := models.Book{}
 	books, err := booksGotten.GetBooks(a.DB)
 	if err != nil {

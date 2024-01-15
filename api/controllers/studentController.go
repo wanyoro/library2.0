@@ -277,3 +277,4 @@ func (a *App) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, resetedUser)
 
 }
+

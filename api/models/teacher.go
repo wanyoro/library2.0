@@ -104,10 +104,21 @@ func (t *Teacher) RemoveTeacher(username string, db *gorm.DB) (string, error) {
 }
 
 // func GetTeacherByUsername gets specific teacher by their username
-func (t *Teacher) GetTeacherByUsername(username string, db *gorm.DB) (*Teacher, error) {
+func (t *Teacher) GetTeacherByUsername(email string, db *gorm.DB) (*Teacher, error) {
 	account := &Teacher{}
-	if err := db.Debug().Table("teachers").Where("username ILIKE ?", username).First(account).Error; err != nil {
+	if err := db.Debug().Table("teachers").Where("email ILIKE ?", t.Email).First(account).Error; err != nil {
 		return nil, err
 	}
 	return account, nil
 }
+
+//func ChangePasswd changes user password 
+// func (t *Teacher) ChangePasswd(email string, db *gorm.DB) (string, error){
+// 	//account := &Teacher{}
+// 	if err := db.Debug().Table("teachers").Where("email=?", t.Email).Updates(Teacher{
+// 		Password: t.BeforeSave(t.Password)}).Error; err != nil {
+// 		return "", err
+// 	}	
+	
+// 	return "Password Changed", nil
+// }

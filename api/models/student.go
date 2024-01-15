@@ -5,6 +5,7 @@ import (
 
 	"log"
 	"strings"
+	//"time"
 
 	"github.com/badoux/checkmail"
 	"golang.org/x/crypto/bcrypt"
@@ -22,6 +23,8 @@ type Student struct {
 	//Notification Notification
 
 }
+
+
 
 type StudentAndBooks struct {
 	StudentUsername string `gorm:"references:Username"`

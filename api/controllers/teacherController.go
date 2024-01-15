@@ -144,3 +144,37 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	resp["teacher successfully removed"] = strings.Split(teachers, "REMOVED")
 	responses.JSON(w, http.StatusOK, resp)
 }
+
+//func ChangePasswd changes password for user
+// func (a *App) ChangePasswd(w http.ResponseWriter, r *http.Request){
+// 	w.Header().Set("Content-Type", "Application/json")
+// 	var resp = map[string]interface{}{}
+// 	params := mux.Vars(r)
+// 	email := (params["email"])
+// 	account := models.Teacher{}
+// 	teacherGot, _ := account.GetTeacherByUsername(email, a.DB)
+// 	if teacherGot == nil {
+// 		resp["status"] = "failed"
+// 		resp["message"] = fmt.Sprintf("%v does not exist", email)
+// 		return
+// 	}
+	
+// 	var teacher models.Teacher
+// 	var err error
+// 	err = json.NewDecoder(r.Body).Decode(&teacher)
+// 	if err != nil {
+// 		resp["status"] = "failed"
+// 		resp["message"] = err.Error()
+// 		return
+// 	}
+// 	newPassword,err := teacherGot.ChangePasswd(email, a.DB)
+// 	if err!= nil{
+// 		resp["status"] = "failed"
+// 		resp["message"] = err.Error()
+// 		return
+	
+// 	}
+
+
+	
+// }

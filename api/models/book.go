@@ -1,29 +1,38 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+
 	//"strconv"
 	"strings"
 
 	"time"
 
+	"github.com/go-redis/redis"
+	_ "github.com/lib/pq"
 	"gorm.io/gorm"
-	//"fmt"
+	//"lib2.0/api/controllers"
 	//"lib2.0/api/main"
 )
 
 type Book struct {
-	gorm.Model
+	ID      uint   `gorm:"primarykey"`
 	Subject string `gorm:"size:50;not null" json:"subject"`
 	//
-	ISBN          uint      `gorm:"size:20;unique" json:"isbn"`
-	IsRead        *bool     `gorm:"size:50"          json:"isread"`
-	StudentID     uint      `json :"StudentID"` //`gorm:"foreignKey:StudentID"`
-	TeacherID     uint      `json: "TeacherID"`
-	Available     bool      `json: "available"`
-	AvailableDate time.Time `json:"availableDate"`
+	ISBN      uint  `gorm:"size:20;unique" json:"isbn"`
+	IsRead    *bool `gorm:"size:50"          json:"isread"`
+	StudentID uint  `json :"StudentID"` //`gorm:"foreignKey:StudentID"`
+	TeacherID uint  `json: "TeacherID"`
+	Available bool  `json: "available"`
+	//AvailableDate time.Time `json:"availableDate"`
 }
 
+type JsonResponse struct {
+	Data   []Book `json:"data"`
+	Source string `json:"source"`
+}
 type BookHistory struct {
 	StudentID  uint       `json:"userId"`
 	BookID     uint       `json:"bookId"`
@@ -103,12 +112,57 @@ func (b *Book) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
 }
 
 // func GetBooks gets all books from database
-func (b *Book) GetBooks(db *gorm.DB) (*[]Book, error) {
+func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	cachedProducts, err := redisClient.Get("book").Bytes()
+
+	response := JsonResponse{}
+
+	if err != nil {
+
+		books := []Book{}
+
+		dbProducts := &books
+		// if err!= nil{
+		// 	return nil, err
+		// }
+		cachedProducts, err = json.Marshal(dbProducts)
+
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+
+		err = redisClient.Set("book", string(cachedProducts), 20*time.Second).Err()
+		if err != nil {
+			return nil, err
+
+		}
+
+		response = JsonResponse{Data: books, Source: "Postgres"}
+		return &response, err
+	}
+
 	books := []Book{}
-	if err := db.Debug().Table("books").Find(&books).Error; err != nil {
+	err = json.Unmarshal(cachedProducts, &books)
+
+	if err != nil {
+		//fmt.Println(err)
 		return nil, err
 	}
-	return &books, nil
+	response = JsonResponse{Data: books, Source: "Redis Cache"}
+
+	return &response, nil
+	//books := []Book{}
+	// 	if err := db.Debug().Table("books").Find(&books).Error; err != nil {
+	// 		return nil, err
+	// 	}
+	// 	return &books, nil
 }
 
 // func UpdateBook updates book subject and student assigned

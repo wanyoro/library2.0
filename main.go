@@ -9,6 +9,7 @@ import (
 
 	//"github.com/joho/godotenv"
 	"lib2.0/api/controllers"
+	//"lib2.0/redis"
 )
 
 type App struct {
@@ -20,6 +21,7 @@ func main() {
 	// if err := godotenv.Load(); err != nil {
 	// 	log.Fatal("Error loading .env file")
 	// }
+	//redis.StartRedis()
 
 	app := controllers.App{}
 	app.Initialize()
