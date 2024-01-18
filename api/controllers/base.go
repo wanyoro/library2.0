@@ -84,4 +84,5 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/populatebooks/{student_id}", a.PopulateBooks).Methods("GET")
 	//s.HandleFunc("/forgotpassword/{email}", a.ForgotPassword).Methods("POST")
 	s.HandleFunc("/resetpassword/:resetToken", a.ResetPassword).Methods("PATCH")
-}   
+	a.Router.HandleFunc("/getbookss", a.GetBoooks).Methods("GET")
+}

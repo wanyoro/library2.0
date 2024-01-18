@@ -3,10 +3,13 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	//"fmt"
+	//"log"
 
 	//"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 
 	"time"
 
@@ -50,6 +53,11 @@ type BookSubjects struct {
 func (b *Book) Prepare() {
 	b.Subject = strings.TrimSpace(b.Subject)
 
+}
+
+type App struct {
+	Router *mux.Router
+	DB     *gorm.DB
 }
 
 // Validate Book input
@@ -111,8 +119,18 @@ func (b *Book) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
 	return &students, nil
 }
 
+func (b *Book) GetBookss(db *gorm.DB) ([]Book, error) {
+
+	books := []Book{}
+	if err := db.Debug().Table("books").Find(&books).Error; err != nil {
+		return []Book{}, err
+	}
+	return books, nil
+}
+
 // func GetBooks gets all books from database
 func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
+	//var a *App
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
@@ -120,49 +138,39 @@ func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
 	})
 
 	cachedProducts, err := redisClient.Get("book").Bytes()
+	if err == nil {
+        // Data found in Redis
+        books := []Book{}
+        if err := json.Unmarshal(cachedProducts, &books); err != nil {
+            return nil, err
+        }
+        return &JsonResponse{Data: books, Source: "Redis Cache"}, nil
+    }
 
-	response := JsonResponse{}
+	// Data not found in Redis, fetch from the database
+    books, err := b.GetBookss(db)
+    if err != nil {
+        return nil, err
+    }
 
-	if err != nil {
+    // Fetch from the database and cache the result in Redis
+    dbProducts := db.Find(&books)
+    if dbProducts.Error != nil {
+        return nil, dbProducts.Error
+    }
 
-		books := []Book{}
+    cachedProducts, err = json.Marshal(books)
+    if err != nil {
+        return nil, err
+    }
 
-		dbProducts := &books
-		// if err!= nil{
-		// 	return nil, err
-		// }
-		cachedProducts, err = json.Marshal(dbProducts)
+    // Set cache in Redis
+    err = redisClient.Set("book", string(cachedProducts), 20*time.Second).Err()
+    if err != nil {
+        return nil, err
+    }
 
-		if err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-
-		err = redisClient.Set("book", string(cachedProducts), 20*time.Second).Err()
-		if err != nil {
-			return nil, err
-
-		}
-
-		response = JsonResponse{Data: books, Source: "Postgres"}
-		return &response, err
-	}
-
-	books := []Book{}
-	err = json.Unmarshal(cachedProducts, &books)
-
-	if err != nil {
-		//fmt.Println(err)
-		return nil, err
-	}
-	response = JsonResponse{Data: books, Source: "Redis Cache"}
-
-	return &response, nil
-	//books := []Book{}
-	// 	if err := db.Debug().Table("books").Find(&books).Error; err != nil {
-	// 		return nil, err
-	// 	}
-	// 	return &books, nil
+    return &JsonResponse{Data: books, Source: "Postgres"}, nil
 }
 
 // func UpdateBook updates book subject and student assigned

@@ -311,3 +311,16 @@ func (a *App) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, fmt.Sprintf("Book of isbn %v, successfully deleted", deletedbook.ISBN))
 }
+
+func (a *App) GetBoooks (w http.ResponseWriter, r*http.Request){
+	w.Header().Set("Content-Type", "Application/json")
+	//cachedBooks, err := redis.RedisClient.Get(context.Background(), )
+	
+	booksGotten := models.Book{}
+	books, err := booksGotten.GetBookss(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, books)
+}
