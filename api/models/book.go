@@ -165,7 +165,7 @@ func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
     }
 
     // Set cache in Redis
-    err = redisClient.Set("book", string(cachedProducts), 20*time.Second).Err()
+    err = redisClient.Set("book", string(cachedProducts), 10*time.Minute).Err()
     if err != nil {
         return nil, err
     }
