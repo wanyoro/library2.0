@@ -50,6 +50,12 @@ type BookSubjects struct {
 	ISBN    uint   `gorm:references: "isbn"`
 }
 
+type BookDefaulters struct {
+	Subject   string `gorm:references: "subject"`
+	StudentID uint   `json :"StudentID"`
+	BookID    uint   `json:"bookId"`
+}
+
 // Prepare strips off white spaces
 func (b *Book) Prepare() {
 	b.Subject = strings.TrimSpace(b.Subject)
@@ -266,4 +272,39 @@ func (b *Book) DeleteBookByISBN(isbn int, db *gorm.DB) *Book {
 		return &Book{} //fmt.Sprintf("Could not delete Book with id %v", isbn)
 	}
 	return b //fmt.Sprintf("Deleted Book with id %v", isbn)
+}
+
+// func CheckDefaulters gets students who have overdue books
+func (b *Book) CheckDefaulters(db *gorm.DB) (*[]BookDefaulters, error) {
+	var defaulter = Student{}
+	var defaulters = []BookDefaulters{}
+	deadline := b.AvailableDate
+	currentTime := time.Now()
+	if err := db.Debug().Where(currentTime.After(deadline)).Create(BookDefaulters{
+		Subject:   b.Subject,
+		StudentID: defaulter.ID,
+		BookID:    b.ID,
+	}).Error; err != nil {
+		return &[]BookDefaulters{}, err
+	}
+	return &defaulters, nil
+
+}
+
+// GetBookDefaulters gets overdue students and books
+func (b *Book) GetBookDefaulters(db *gorm.DB) (*[]BookDefaulters, error) {
+	bookDefaultersAll := []BookDefaulters{}
+	if err := db.Find(&BookDefaulters{}).Error; err != nil {
+		return &[]BookDefaulters{}, err
+	}
+	return &bookDefaultersAll, nil
+}
+
+// Func GetDefaultedBooks gets overdue books
+func (b *Book) GetDefaultedBooks(db *gorm.DB) (*[]BookDefaulters, error) {
+	var bookDefaultersOverDue = &[]BookDefaulters{}
+	if err := db.Debug().Table("books").Select("subject, student_id, isbn").Where("available_date<?", time.Now()).Find(bookDefaultersOverDue).Error; err != nil {
+		return nil, err
+	}
+	return bookDefaultersOverDue, nil
 }

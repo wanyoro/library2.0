@@ -33,7 +33,7 @@ func (a *App) Initialize() {
 	} else {
 		fmt.Printf("Connected to database lib")
 	}
-	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{}, &models.StudentAndBooks{})
+	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{}, &models.StudentAndBooks{}, &models.BookDefaulters{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 	a.InitializeRoutes()
@@ -85,4 +85,5 @@ func (a *App) InitializeRoutes() {
 	//s.HandleFunc("/forgotpassword/{email}", a.ForgotPassword).Methods("POST")
 	s.HandleFunc("/resetpassword/:resetToken", a.ResetPassword).Methods("PATCH")
 	a.Router.HandleFunc("/getbookss", a.GetBoooks).Methods("GET")
+	a.Router.HandleFunc("/getdefaulters", a.GetBookDefaulters).Methods("GET")
 }

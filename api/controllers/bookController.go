@@ -326,3 +326,19 @@ func (a *App) GetBoooks(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, books)
 }
+
+// func GetDefaulters gets defaulters from DB
+func (a *App) GetBookDefaulters(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	//defaulters:= models.BookDefaulters{}
+	book := models.Book{}
+
+	def, err := book.GetDefaultedBooks(a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+
+	}
+	responses.JSON(w, http.StatusOK, def)
+
+}
