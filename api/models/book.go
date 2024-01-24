@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"time"
+	//"lib2.0/api/redis"
 
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
@@ -54,6 +55,13 @@ type BookDefaulters struct {
 	Subject   string `gorm:references: "subject"`
 	StudentID uint   `json :"StudentID"`
 	BookID    uint   `json:"bookId"`
+}
+
+type OverdueDays struct {
+	ISBN        uint   `gorm:references: "isbn"`
+	StudentId   uint   `json :"StudentId"`
+	Subject     string `json:"subject"`
+	OverdueDays uint   //`json:"overdue_days"`
 }
 
 // Prepare strips off white spaces
@@ -307,4 +315,13 @@ func (b *Book) GetDefaultedBooks(db *gorm.DB) (*[]BookDefaulters, error) {
 		return nil, err
 	}
 	return bookDefaultersOverDue, nil
+}
+
+// func GetOverdueTime on books
+func (b *Book) GetOverdueDays(db *gorm.DB) (*[]OverdueDays, error) {
+	var overdueDays = &[]OverdueDays{}
+	if err := db.Debug().Raw("select isbn,student_id, subject, extract(day from age(current_date, available_date)) as overdue_days from books where current_date > available_date").Scan(&overdueDays).Error; err != nil {
+		return nil, err
+	}
+	return overdueDays, nil
 }

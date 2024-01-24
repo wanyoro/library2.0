@@ -86,4 +86,5 @@ func (a *App) InitializeRoutes() {
 	s.HandleFunc("/resetpassword/:resetToken", a.ResetPassword).Methods("PATCH")
 	a.Router.HandleFunc("/getbookss", a.GetBoooks).Methods("GET")
 	a.Router.HandleFunc("/getdefaulters", a.GetBookDefaulters).Methods("GET")
+	s.HandleFunc("/getoverduedays", a.GetOverdueDays).Methods("GET")
 }

@@ -342,3 +342,16 @@ func (a *App) GetBookDefaulters(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, def)
 
 }
+
+//func GetOverdueDays on books
+func (a *App) GetOverdueDays (w http.ResponseWriter, r*http.Request){
+	w.Header().Set("Content-Type", "Application/json")
+	//var days models.OverdueDays
+	var book models.Book
+	books, err := book.GetOverdueDays(a.DB)
+	if err != nil{
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, books)
+}
