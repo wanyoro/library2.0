@@ -320,8 +320,19 @@ func (b *Book) GetDefaultedBooks(db *gorm.DB) (*[]BookDefaulters, error) {
 // func GetOverdueTime on books
 func (b *Book) GetOverdueDays(db *gorm.DB) (*[]OverdueDays, error) {
 	var overdueDays = &[]OverdueDays{}
+
 	if err := db.Debug().Raw("select isbn,student_id, subject, extract(day from age(current_date, available_date)) as overdue_days from books where current_date > available_date").Scan(&overdueDays).Error; err != nil {
 		return nil, err
 	}
 	return overdueDays, nil
+}
+
+// func GetOverDueDaysPerStudent
+func (b *Book) GetOverDueDaysPerStudent(studentID uint, db *gorm.DB) (*OverdueDays, error) {
+	var overdueDays = &OverdueDays{}
+	if err := db.Debug().Raw("select isbn,student_id, subject, extract(day from age(current_date, available_date)) as overdue_days from books where current_date > available_date and student_id=?", studentID).Find(&overdueDays).Error; err != nil {
+		return nil, err
+	}
+	return overdueDays, nil
+
 }

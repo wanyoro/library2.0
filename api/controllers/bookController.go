@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"strconv"
 
+	//"gorm.io/gorm"
+
 	//"errors"
 
 	"github.com/gorilla/mux"
@@ -219,23 +221,40 @@ func (a *App) AssignBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	var resp = map[string]interface{}{"Status": "Success", "Message": "Book Issued Succesfully"}
 	var response = map[string]interface{}{"Status": "Failed", "Message": "this book is already assigned to student"}
+
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["isbn"])
 	Book := models.Book{}
+	//var db *gorm.DB
+	//overdueDays := models.OverdueDays{}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-
+	err = json.Unmarshal(body, &Book)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	fmt.Printf("Student id:%v", Book.StudentID)
 	bookGotten, err := Book.GetBookById(id, a.DB)
+
+	fmt.Println(bookGotten.StudentID)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
+	//fmt.Println(bookGotten.ISBN)
 	if bookGotten.StudentID != 0 {
 		responses.JSON(w, http.StatusBadRequest, response)
+		return
+	}
+	overdue, err := Book.GetOverDueDaysPerStudent(Book.StudentID, a.DB)
+
+	if overdue.OverdueDays != 0 {
+		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("Student has overdue book of isbn %v and subject %s. Return overdue book first", overdue.ISBN, overdue.Subject))
+		fmt.Println(err)
 		return
 	}
 
@@ -343,15 +362,36 @@ func (a *App) GetBookDefaulters(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func GetOverdueDays on books
-func (a *App) GetOverdueDays (w http.ResponseWriter, r*http.Request){
+// func GetOverdueDays on books
+func (a *App) GetOverdueDays(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	//var days models.OverdueDays
 	var book models.Book
 	books, err := book.GetOverdueDays(a.DB)
-	if err != nil{
+	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 	responses.JSON(w, http.StatusOK, books)
 }
+
+// func RecordExists(StudentID uint, db *gorm.DB) (bool, error) {
+// 	book := models.Book{}
+// 	//var a App
+// 	//Get overdue days for the student
+// 	overdueDays, err := book.GetOverDueDaysPerStudent(db, StudentID)
+// 	if err != nil {
+// 		return false, err
+
+// 	}
+// 	//Check if student has overdue books
+// 	err = db.Model(&overdueDays).Where("student_id= ?", StudentID).First(&overdueDays).Error
+// 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+// 		fmt.Println
+// 		return false, nil //Student has no overdue books
+// 	} else if err != nil {
+// 		return false, err
+// 	}
+
+// 	return true, nil
+// }
