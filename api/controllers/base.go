@@ -87,4 +87,5 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/getbookss", a.GetBoooks).Methods("GET")
 	a.Router.HandleFunc("/getdefaulters", a.GetBookDefaulters).Methods("GET")
 	s.HandleFunc("/getoverduedays", a.GetOverdueDays).Methods("GET")
+	a.Router.HandleFunc("/exportbooks", a.exportBooksHandler).Methods("GET")
 }

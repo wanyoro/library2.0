@@ -137,7 +137,7 @@ func (b *Book) PopulateBooks(studentID int, db *gorm.DB) (*Student, error) {
 func (b *Book) GetBookss(db *gorm.DB) ([]Book, error) {
 
 	books := []Book{}
-	if err := db.Debug().Table("books").Find(&books).Error; err != nil {
+	if err := db.Debug().Table("books").Order("id ASC").Find(&books).Error; err != nil {
 		return []Book{}, err
 	}
 	return books, nil
