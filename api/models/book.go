@@ -32,7 +32,16 @@ type Book struct {
 	TeacherID     uint      `json: "TeacherID"`
 	Available     bool      `json: "available"`
 	AvailableDate time.Time `json:"availableDate"`
+	AvgRating float64
+	//Category 
 }
+
+// type Rating struct{
+// 	gorm.Model
+// 	BookID uint
+// 	RaterID uint
+// 	Score float64
+// }
 
 type JsonResponse struct {
 	Data   []Book `json:"data"`
@@ -336,3 +345,15 @@ func (b *Book) GetOverDueDaysPerStudent(studentID uint, db *gorm.DB) (*OverdueDa
 	return overdueDays, nil
 
 }
+
+// func (b *Book) CalculateAverageRating()float64{
+// 	if len(b.Rating)==0{
+// 		return 0.0
+// 	}
+// 	total :=0.0
+
+// 	for _, rating :=range b.Ratings{
+// 		total += rating.Score
+// 	}
+// 	return total / float64(len(b.Ratings))
+// }

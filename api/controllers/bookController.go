@@ -15,7 +15,7 @@ import (
 
 	//"gorm.io/gorm"
 
-	//"errors"
+	"errors"
 
 	"github.com/gorilla/mux"
 	"lib2.0/api/models"
@@ -375,23 +375,50 @@ func (a *App) GetOverdueDays(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, books)
 }
 
-// func RecordExists(StudentID uint, db *gorm.DB) (bool, error) {
-// 	book := models.Book{}
-// 	//var a App
-// 	//Get overdue days for the student
-// 	overdueDays, err := book.GetOverDueDaysPerStudent(db, StudentID)
-// 	if err != nil {
-// 		return false, err
+func (a *App) RateBook(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	isbn, err := strconv.Atoi(vars["isbn"])
+	if err != nil {
+		return
+	}
+
+	var ratingData struct {
+		Score float64 `json:"score"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&ratingData); err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	var book models.Book
+	result := a.DB.First(&book, "isbn=?", isbn)
+	if result.Error != nil {
+		responses.ERROR(w, http.StatusNotFound, errors.New("Book not found"))
+		return
+	}
+	//newRating := models.Rating{Score: ratingData.Score}
+	book.AvgRating = (book.AvgRating + ratingData.Score) / 2
+	a.DB.Save(&book)
+
+	//averageRating := book.CalculateAverageRating()
+	//.Rating = averageRating
+	//a.DB.Save(&book)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Book rated successfully.")
+}
+
+// func(a *App) GetAverageRating(w http.ResponseWriter, r*http.Request){
+// 	vars := mux.Vars(r)
+// 	isbn := vars["isbn"]
+
+// 	var book models.Book
+// 	result :=a.DB.Preload("Ratings").First(&book, "isbn= ?", isbn)
+// 	if result.Error!= nil{
+// 		responses.ERROR(w, http.StatusNotFound, fmt.Errorf("Book not found"))
+// 		return
 
 // 	}
-// 	//Check if student has overdue books
-// 	err = db.Model(&overdueDays).Where("student_id= ?", StudentID).First(&overdueDays).Error
-// 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-// 		fmt.Println
-// 		return false, nil //Student has no overdue books
-// 	} else if err != nil {
-// 		return false, err
-// 	}
+// 	averageRating:= book.CalculateAverageRating()
+// 	responses.JSON(w, http.StatusOK ,averageRating)
 
-// 	return true, nil
 // }

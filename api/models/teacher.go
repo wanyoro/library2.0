@@ -122,3 +122,4 @@ func (t *Teacher) GetTeacherByUsername(email string, db *gorm.DB) (*Teacher, err
 	
 // 	return "Password Changed", nil
 // }
+

@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	
 	"encoding/json"
+	
+
 	//"errors"
 
 	"fmt"
@@ -178,3 +181,5 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 
 	
 // }
+
+//RequestPasswordReset generates a reset token and sends an email
