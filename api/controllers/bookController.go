@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	//"log"
 	"time"
 
 	//"time"
@@ -12,6 +13,8 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/jung-kurt/gofpdf"
 
 	//"gorm.io/gorm"
 
@@ -407,18 +410,25 @@ func (a *App) RateBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Book rated successfully.")
 }
 
-// func(a *App) GetAverageRating(w http.ResponseWriter, r*http.Request){
-// 	vars := mux.Vars(r)
-// 	isbn := vars["isbn"]
+func (a *App) ExportBooksToPDF (w http.ResponseWriter, r*http.Request){
+	pdf := gofpdf.New("P", "mm", "A4", "")
 
-// 	var book models.Book
-// 	result :=a.DB.Preload("Ratings").First(&book, "isbn= ?", isbn)
-// 	if result.Error!= nil{
-// 		responses.ERROR(w, http.StatusNotFound, fmt.Errorf("Book not found"))
-// 		return
+	pdf.AddPage()
 
-// 	}
-// 	averageRating:= book.CalculateAverageRating()
-// 	responses.JSON(w, http.StatusOK ,averageRating)
+	pdf.SetFont("Arial", "",12)
+	//fetch books
+	var books  []models.Book
+	a.DB.Find(&books)
+	for _, book := range books{
+		bookInfo := fmt.Sprintf("Subject: %s\nISBN: %d\n\n", book.Subject, book.ISBN)
+		pdf.MultiCell(0, 10, bookInfo, "", "0", false)
+	}
+	w.Header().Set("Content-Disposition", "attachement; filename=books_export.pdf")
+	w.Header().Set("Content-Type", "application/pdf")
 
-// }
+	err:= pdf.Output(w)
+	if err!= nil{
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+	fmt.Println("PDF exported successfully")
+}
