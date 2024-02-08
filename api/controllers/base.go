@@ -33,7 +33,7 @@ func (a *App) Initialize() {
 	} else {
 		fmt.Printf("Connected to database lib")
 	}
-	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{}, &models.StudentAndBooks{}, &models.BookDefaulters{}, &models.OverdueDays{})
+	a.DB.Debug().AutoMigrate(&models.Student{}, &models.Book{}, &models.Teacher{}, &models.Notification{}, &models.StudentAndBooks{}, &models.BookDefaulters{}, &models.OverdueDays{}, &models.CompletedBook{})
 
 	a.Router = mux.NewRouter().StrictSlash(true)
 	a.InitializeRoutes()
@@ -64,7 +64,7 @@ func (a *App) InitializeRoutes() {
 	s.HandleFunc("/updatebook/{isbn}", a.UpdateBook).Methods("PUT")
 	a.Router.HandleFunc("/getstudentbookcount", a.GetStudentBookCount).Methods("GET")
 	a.Router.HandleFunc("/createnotification", a.CreateNotif).Methods("POST")
-	a.Router.HandleFunc("/updatereadingprogress/{id}", a.UpdateReadingProgress).Methods("PUT")
+	a.Router.HandleFunc("/updatereadingprogress/{isbn}", a.UpdateReadingProgress).Methods("PUT")
 	a.Router.HandleFunc("/getstudent/{id}", a.GetStudentById).Methods("GET")
 	a.Router.HandleFunc("/getnotifs", a.GetNotifs).Methods("GET")
 	s.HandleFunc("/returnbook/{isbn}", a.ReturnBook).Methods("PUT")
@@ -87,5 +87,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/exportbooks", a.exportBooksHandler).Methods("GET")
 	a.Router.HandleFunc("/ratebook/{isbn}", a.RateBook).Methods("PUT")
 	a.Router.HandleFunc("/exportBooksPDF", a.ExportBooksToPDF).Methods("GET")
+	//a.Router.HandleFunc("/completeBook/{studentID}/{bookID}",a.CompleteBook).Methods("POST")
+	a.Router.HandleFunc("/completedBook/{isbn}", a.CompleteBook).Methods("POST")
 	//a.Router.HandleFunc("/averagerating/{isbn}", a.GetAverageRating).Methods("GET")
 }

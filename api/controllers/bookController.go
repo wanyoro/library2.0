@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	//"log"
+
+	"log"
 	"time"
 
 	//"time"
@@ -130,7 +132,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
 	var resp = map[string]interface{}{"status": "Successful", "message": "progress updated successfully"}
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+	isbn, err := strconv.Atoi(params["isbn"])
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -143,7 +145,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 	}
 	book := models.Book{}
 
-	BookGot, err := book.GetBookById(id, a.DB)
+	BookGot, err := book.GetBookById(isbn, a.DB)
 	if err != nil {
 		resp["status"] = "failed"
 		resp["message"] = "book does not exist in database"
@@ -155,7 +157,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	UpdatedBook, err := BookGot.UpdateReadingProgress(id, a.DB)
+	UpdatedBook, err := BookGot.UpdateReadingProgress(isbn, a.DB)
 	if err != nil {
 		resp["status"] = "failed"
 		resp["message"] = "check book"
@@ -164,7 +166,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		resp["status"] = "Success"
 		resp["message"] = "Book updated successfully"
 	}
-	resp["book"], _ = UpdatedBook.GetBookById(id, a.DB)
+	resp["book"], _ = UpdatedBook.GetBookById(isbn, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
 }
 
@@ -410,25 +412,93 @@ func (a *App) RateBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Book rated successfully.")
 }
 
-func (a *App) ExportBooksToPDF (w http.ResponseWriter, r*http.Request){
+func (a *App) ExportBooksToPDF(w http.ResponseWriter, r *http.Request) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 
 	pdf.AddPage()
 
-	pdf.SetFont("Arial", "",12)
+	pdf.SetFont("Arial", "", 12)
 	//fetch books
-	var books  []models.Book
+	var books []models.Book
 	a.DB.Find(&books)
-	for _, book := range books{
+	for _, book := range books {
 		bookInfo := fmt.Sprintf("Subject: %s\nISBN: %d\n\n", book.Subject, book.ISBN)
 		pdf.MultiCell(0, 10, bookInfo, "", "0", false)
 	}
 	w.Header().Set("Content-Disposition", "attachement; filename=books_export.pdf")
 	w.Header().Set("Content-Type", "application/pdf")
 
-	err:= pdf.Output(w)
-	if err!= nil{
+	err := pdf.Output(w)
+	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 	}
 	fmt.Println("PDF exported successfully")
+}
+
+func (a *App) CompleteBook(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	// studentID, err := strconv.Atoi(vars["ID"])
+	// if err!= nil{
+	// 	responses.ERROR(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	isbn, err := strconv.Atoi(vars["isbn"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	book := models.Book{}
+	result, err := book.GetBookById(isbn, a.DB)
+	if result.ISBN == 0 {
+		log.Printf("book of isbn %s does not exist", book.ISBN)
+	}
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	fmt.Println("Request Body:", string(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	// var student models.Student
+	// if result :=a.DB.First(&student, studentID);result.Error!= nil{
+	// 	responses.ERROR(w, http.StatusNotFound, err)
+	// 	return
+	// }
+	var completionStatus struct {
+		IsRead bool `json:"isRead"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&completionStatus); err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	book.IsRead = &completionStatus.IsRead
+	a.DB.Save(&book)
+
+	if *book.IsRead {
+		var student models.Student
+		if result := a.DB.First(&student, "id=?", book.StudentID); result.Error != nil {
+			responses.ERROR(w, http.StatusNotFound, err)
+			return
+		}
+		//var student models.Student
+		completedBook := models.CompletedBook{
+			BookID:      book.ID,
+			StudentID:   student.ID,
+			CompletedAt: time.Now(),
+		}
+		student.CompletedBooks = append(student.CompletedBooks, completedBook)
+		a.DB.Save(&student)
+	}
+	//responses.JSON(w, http.StatusOK, fmt.Fprintf())
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Book marked as completed with ID %d", book.ID)
+
 }

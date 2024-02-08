@@ -32,8 +32,16 @@ type Book struct {
 	TeacherID     uint      `json: "TeacherID"`
 	Available     bool      `json: "available"`
 	AvailableDate time.Time `json:"availableDate"`
-	AvgRating float64
-	//Category 
+	AvgRating     float64
+	//Category
+}
+
+type CompletedBook struct {
+	gorm.Model
+	BookID      uint
+	BookSubject string
+	StudentID   uint
+	CompletedAt time.Time
 }
 
 // type Rating struct{
@@ -202,6 +210,7 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 	BookSubject := b.Subject
 	StudentId := b.StudentID
 	BookId := b.ID
+	//Subject := b.Subject
 
 	notif := Notification{}
 	if err := db.Debug().Table("books").Where("isbn =?", b.ISBN).Updates(Book{
@@ -223,6 +232,12 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 				BookId:      BookId,
 				TeacherID:   b.TeacherID,
 			})
+			db.Debug().Create(&CompletedBook{
+				BookID:      b.ID,
+				BookSubject: b.Subject,
+				StudentID:   b.StudentID,
+				CompletedAt: time.Now(),
+			})
 		}
 	}
 
@@ -230,8 +245,8 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 }
 
 // func UpdateReadingProgress sets reading progress to true and creates notif
-func (b *Book) UpdateReadingProgress(id int, db *gorm.DB) (*Book, error) {
-	if err := db.Debug().Table("books").Where("id =?", b.ID).Updates(Book{
+func (b *Book) UpdateReadingProgress(isbn int, db *gorm.DB) (*Book, error) {
+	if err := db.Debug().Table("books").Where("isbn =?", b.ID).Updates(Book{
 		IsRead: b.IsRead}).Error; err != nil {
 		return &Book{}, err
 	}
@@ -345,15 +360,3 @@ func (b *Book) GetOverDueDaysPerStudent(studentID uint, db *gorm.DB) (*OverdueDa
 	return overdueDays, nil
 
 }
-
-// func (b *Book) CalculateAverageRating()float64{
-// 	if len(b.Rating)==0{
-// 		return 0.0
-// 	}
-// 	total :=0.0
-
-// 	for _, rating :=range b.Ratings{
-// 		total += rating.Score
-// 	}
-// 	return total / float64(len(b.Ratings))
-// }

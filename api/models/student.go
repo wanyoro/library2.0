@@ -20,6 +20,7 @@ type Student struct {
 	Password      string  `gorm:"size:100;not null"              json:"password"`
 	Books         *[]Book `json:"books"`
 	BooksAssigned int     `json:"booksassigned" `
+	CompletedBooks []CompletedBook
 	//Notification Notification
 
 }
