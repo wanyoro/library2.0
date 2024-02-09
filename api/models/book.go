@@ -207,6 +207,24 @@ func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
 
 // func UpdateBook updates book subject and student assigned
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
+	
+	if err := db.Debug().Table("books").Where("isbn =?", b.ISBN).Updates(Book{
+		Subject: b.Subject,
+
+		//StudentID: b.StudentID,
+		//IsRead: b.IsRead,
+		TeacherID: b.TeacherID,
+		
+		ISBN:    b.ISBN}).Error; err != nil {
+		return &Book{}, err
+	}
+	
+
+	return b, nil
+}
+
+// func UpdateReadingProgress sets reading progress to true and creates notif
+func (b *Book) UpdateReadingProgress(isbn int, db *gorm.DB) (*Book, error) {
 	BookSubject := b.Subject
 	StudentId := b.StudentID
 	BookId := b.ID
@@ -239,16 +257,6 @@ func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
 				CompletedAt: time.Now(),
 			})
 		}
-	}
-
-	return b, nil
-}
-
-// func UpdateReadingProgress sets reading progress to true and creates notif
-func (b *Book) UpdateReadingProgress(isbn int, db *gorm.DB) (*Book, error) {
-	if err := db.Debug().Table("books").Where("isbn =?", b.ID).Updates(Book{
-		IsRead: b.IsRead}).Error; err != nil {
-		return &Book{}, err
 	}
 	return b, nil
 }
