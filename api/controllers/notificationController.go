@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"log"
+	//"encoding/json"
 	
 
 	"github.com/gorilla/mux"
@@ -68,13 +69,21 @@ func (a *App) DeleteAllNotifications(w http.ResponseWriter, r *http.Request) {
 }
 
 
+
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+var connections = make(map[*websocket.Conn]bool)
+var broadcast = make(chan Notification)
+
+type Notification struct {
+	Message string `json:"message"`
+	//IsRead bool `json:"isRead"`
+}
+
+func(a *App) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -82,30 +91,48 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Maintain a list of connected clients
-	clients := make(map[*websocket.Conn]bool)
+	connections[conn] = true
 
 	for {
-		var msg map[string]interface{}
-		err := conn.ReadJSON(&msg)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		// Process the received message
-		// Check if it's related to a book being marked as read
-		isRead, ok := msg["isRead"].(bool)
-		if ok && isRead {
-			// Broadcast a notification to all connected clients (teachers)
-			for client := range clients {
-				err := client.WriteJSON(map[string]interface{}{"message": "Book marked as read"})
+		select {
+		case notification := <-broadcast:
+			// Send notification to all connected clients
+			for c := range connections {
+				err := c.WriteJSON(notification)
 				if err != nil {
 					log.Println(err)
-					client.Close()
-					delete(clients, client)
+					delete(connections, c)
+					break
 				}
 			}
 		}
 	}
 }
+
+// Define a Message struct
+type Message struct {
+	Type    int    `json:"type"`
+	Content string `json:"content"`
+}
+
+// sendMessage sends a message to the WebSocket connection
+// func sendMessage(conn *websocket.Conn, message string) error {
+// 	// Create a Message object
+// 	msg := Message{
+// 		Type:    1, // Set the message type as needed
+// 		Content: message,
+// 	}
+
+// 	// Marshal the Message object to JSON
+// 	jsonMessage, err := json.Marshal(msg)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Send the JSON message to the WebSocket connection
+// 	if err := conn.WriteMessage(websocket.TextMessage, jsonMessage); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }

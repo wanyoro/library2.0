@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/websocket"
 	"github.com/jung-kurt/gofpdf"
 
 	//"gorm.io/gorm"
@@ -127,6 +128,31 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, resp)
 }
 
+// sendMessage sends a message to the WebSocket connection
+func sendMessage(conn *websocket.Conn, message string) error {
+	if conn == nil {
+		return errors.New("WebSocket connection is nil")
+	}
+	// Create a Message object
+	msg := Message{
+		Type:    1, // Set the message type as needed
+		Content: message,
+	}
+
+	// Marshal the Message object to JSON
+	jsonMessage, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	// Send the JSON message to the WebSocket connection
+	if err := conn.WriteMessage(websocket.TextMessage, jsonMessage); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // func UpdateReadingProgress sets reading progress to true or false
 func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "Application/json")
@@ -163,11 +189,28 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 		resp["message"] = "check book"
 
 	} else {
+		//notif := models.Notification{}
+
+		message := fmt.Sprintf("Book of ID %d for Student ID %d is read", UpdatedBook.ID, UpdatedBook.StudentID)
+		var conn *websocket.Conn
+		err := sendMessage(conn, message)
+		if err != nil {
+			responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("Error sending WebSocket message"))
+		}
 		resp["status"] = "Success"
 		resp["message"] = "Book updated successfully"
 	}
 	resp["book"], _ = UpdatedBook.GetBookById(isbn, a.DB)
 	responses.JSON(w, http.StatusCreated, resp)
+
+	//Notify client if isRead is true
+	if *UpdatedBook.IsRead {
+		notification := Notification{
+			Message: "Book of ISBN" + strconv.Itoa(int(UpdatedBook.ISBN)) + "is read by student of id"  + strconv.Itoa(int(UpdatedBook.StudentID)),
+		}
+		broadcast <- notification
+
+	}
 }
 
 // func ReturnBook updates values to default

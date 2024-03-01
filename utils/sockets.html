@@ -3,32 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Notifications</title>
+    <title>WebSocket Client</title>
 </head>
 <body>
-    <ul id="notifications"></ul>
 
-    <script>
-        const socket = new WebSocket("ws://localhost:8080/ws");
-        const notificationsList = document.getElementById("notifications");
+<div id="messages"></div>
 
-        socket.onmessage = (event) => {
-            const notification = document.createElement("li");
-            notification.textContent = event.data;
-            notificationsList.appendChild(notification);
-        };
+<script>
+    const messagesElement = document.getElementById('messages');
 
-        socket.onclose = (event) => {
-            if (event.wasClean) {
-                console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
-            } else {
-                console.error(`Connection died`);
-            }
-        };
+    // WebSocket connection
+    const socket = new WebSocket('ws://localhost:8001/ws');
 
-        socket.onerror = (error) => {
-            console.error(`Error: ${error.message}`);
-        };
-    </script>
+    // Connection opened
+    socket.addEventListener('open', (event) => {
+        console.log('WebSocket connection opened:', event);
+    });
+
+    // Listen for messages from the server
+    socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data);
+        console.log('Received message:', message);
+
+        // Display the message on the web page
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message.message;
+        messagesElement.appendChild(messageElement);
+    });
+
+    // Connection closed
+    socket.addEventListener('close', (event) => {
+        console.log('WebSocket connection closed:', event);
+    });
+
+    // Connection error
+    socket.addEventListener('error', (event) => {
+        console.error('WebSocket connection error:', event);
+    });
+</script>
+
 </body>
 </html>
