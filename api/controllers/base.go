@@ -22,7 +22,7 @@ type App struct {
 // connect to db
 func (a *App) Initialize() {
 	var err error
-	const DNS = "postgres://postgres@localhost/lib?sslmode=disable"
+	const DNS = "postgres://postgres:nakaasana@localhost/lib?sslmode=disable"
 
 	a.DB, err = gorm.Open(postgres.Open(DNS), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
