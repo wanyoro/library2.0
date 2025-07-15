@@ -3,6 +3,9 @@ package models
 import (
 	"errors"
 	//"fmt"
+	//"log"
+
+	//"fmt"
 	"strings"
 
 	//"github.com/badoux/checkmail"
@@ -26,6 +29,20 @@ func (t *Teacher) BeforeSave() error {
 	}
 	t.Password = string(hashedpassword)
 	return nil
+} //func (t *Teacher) BeforeCreate(tx *gorm.DB) (err error) {
+//	return t.CheckPassword()
+//}
+
+// func CheckPassword checks if password contains correct characters
+func (t *Teacher) CheckPassword() error {
+	//password := strings.TrimSpace(t.Password)
+	if len(t.Password) < 6 {
+		return errors.New("password must be at least 6 characters long")
+	}
+	if !strings.ContainsAny(t.Password, "0123456789") {
+		return errors.New("password must contain at least one number")
+	}
+	return nil
 }
 
 // func Prepare strips white spaces off input
@@ -45,9 +62,8 @@ func (t *Teacher) Validate(action string) error {
 		if t.Password == "" {
 			return errors.New("please enter password")
 		}
-		return nil
 
-	
+		return nil
 
 		// default: //all fields required
 		// 	if t.Username == "" {
@@ -70,10 +86,12 @@ func (t *Teacher) Validate(action string) error {
 // func Saveteacher adds teacher to database
 func (t *Teacher) SaveTeacher(db *gorm.DB) (*Teacher, error) {
 	//var err error
+
 	err := db.Debug().Create(&t).Error
 	if err != nil {
 		return &Teacher{}, err
 	}
+
 	return t, nil
 }
 
@@ -112,14 +130,13 @@ func (t *Teacher) GetTeacherByUsername(email string, db *gorm.DB) (*Teacher, err
 	return account, nil
 }
 
-//func ChangePasswd changes user password 
+//func ChangePasswd changes user password
 // func (t *Teacher) ChangePasswd(email string, db *gorm.DB) (string, error){
 // 	//account := &Teacher{}
 // 	if err := db.Debug().Table("teachers").Where("email=?", t.Email).Updates(Teacher{
 // 		Password: t.BeforeSave(t.Password)}).Error; err != nil {
 // 		return "", err
-// 	}	
-	
+// 	}
+
 // 	return "Password Changed", nil
 // }
-

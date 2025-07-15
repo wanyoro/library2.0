@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	
 	"encoding/json"
-	
 
 	//"errors"
 
@@ -38,16 +36,21 @@ func (a *App) TeacherSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teach, _ := teacher.GetTeacherByUsername(teacher.Username, a.DB)
-	if teach != nil {
-		
-		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("%v already exists", teacher.Username))
+	//Validate password
+	if err := teacher.CheckPassword(); err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
+	//teach, _ := teacher.GetTeacherByUsername(teacher.Username, a.DB)
+	//if teach.Username = nil {
+
+	//	responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("%v already exists", teacher.Username))
+	//	return
+	//}
+	//teacher.CheckPassword()
 	teacher.Prepare()
 	teacher.BeforeSave()
-
 
 	teacherCreated, err := teacher.SaveTeacher(a.DB)
 	if err != nil {
@@ -161,7 +164,7 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 // 		resp["message"] = fmt.Sprintf("%v does not exist", email)
 // 		return
 // 	}
-	
+
 // 	var teacher models.Teacher
 // 	var err error
 // 	err = json.NewDecoder(r.Body).Decode(&teacher)
@@ -175,11 +178,9 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 // 		resp["status"] = "failed"
 // 		resp["message"] = err.Error()
 // 		return
-	
+
 // 	}
 
-
-	
 // }
 
 //RequestPasswordReset generates a reset token and sends an email
