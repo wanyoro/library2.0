@@ -35,7 +35,7 @@ func (a *App) StudentSignUp(w http.ResponseWriter, r *http.Request) {
 	stu, _ := student.GetStudent(a.DB)
 	if stu != nil {
 		resp["status"] = "failure"
-		resp["message"] = "student already exists with this email address please login"
+		resp["message"] = "email exists please login"
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -277,4 +277,3 @@ func (a *App) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, resetedUser)
 
 }
-

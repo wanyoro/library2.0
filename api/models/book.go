@@ -207,20 +207,18 @@ func (b *Book) GetBooks(db *gorm.DB) (*JsonResponse, error) {
 
 // func UpdateBook updates book subject and student assigned
 func (b *Book) UpdateBook(id int, db *gorm.DB) (*Book, error) {
-	
-	if err := db.Debug().Table("books").Where("isbn =?", b.ISBN).Updates(Book{
-		Subject: b.Subject,
 
-		//StudentID: b.StudentID,
-		//IsRead: b.IsRead,
-		TeacherID: b.TeacherID,
-		
-		ISBN:    b.ISBN}).Error; err != nil {
+	if err := db.Debug().Model(&Book{}).Where("isbn =?", id).Select("*").Updates(b).Error; err != nil {
 		return &Book{}, err
 	}
-	
 
-	return b, nil
+	//Return updated book
+	updatedBook := &Book{}
+	if err := db.Where("isbn = ?", id).First(updatedBook).Error; err != nil {
+		return &Book{}, err
+	}
+
+	return updatedBook, nil
 }
 
 // func UpdateReadingProgress sets reading progress to true and creates notif
@@ -296,10 +294,11 @@ func (b *Book) IssueBook(id int, db *gorm.DB) (*Book, error) {
 	currentTime := time.Now()
 	returnDate := currentTime.AddDate(0, 0, 15)
 	if err := db.Debug().Table("books").Where("isbn=?", b.ISBN).Updates(map[string]interface{}{
-		"is_read":        "false",
-		"student_id":     b.StudentID,
-		"teacher_id":     b.TeacherID,
-		"available":      "false",
+		"is_read":    "false",
+		"student_id": b.StudentID,
+		"teacher_id": b.TeacherID,
+		"available":  "false",
+
 		"available_date": returnDate}).Error; err != nil {
 		return &Book{}, err
 	}

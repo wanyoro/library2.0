@@ -5,6 +5,7 @@ import (
 
 	"log"
 	"strings"
+
 	//"time"
 
 	"github.com/badoux/checkmail"
@@ -14,18 +15,16 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username      string  `gorm:"size:100;not null"              json:"username"`
-	PhoneNumber   int     `gorm:"size:20;not null"               json:"phonenumber"`
-	Email         string  `gorm:"type:varchar(100);unique_index" json:"email"`
-	Password      string  `gorm:"size:100;not null"              json:"password"`
-	Books         *[]Book `json:"books"`
-	BooksAssigned int     `json:"booksassigned" `
+	Username string `gorm:"size:100;not null"              json:"username"`
+	//PhoneNumber   int     `gorm:"size:20;not null"               json:"phonenumber"`
+	Email          string  `gorm:"type:varchar(100);unique_index" json:"email"`
+	Password       string  `gorm:"size:100;not null"              json:"password"`
+	Books          *[]Book `json:"books"`
+	BooksAssigned  int     `json:"booksassigned" `
 	CompletedBooks []CompletedBook
 	//Notification Notification
 
 }
-
-
 
 type StudentAndBooks struct {
 	StudentUsername string `gorm:"references:Username"`
@@ -90,9 +89,7 @@ func (s *Student) Validate(action string) error {
 		}
 		if s.Password == "" {
 			return errors.New("please provide password ")
-		}
-		if s.PhoneNumber == 0 {
-			return errors.New("please enter phone number")
+
 		}
 		if err := checkmail.ValidateFormat(s.Email); err != nil {
 			return errors.New("invalid email")
@@ -143,10 +140,9 @@ func (s *Student) GetStudentByEmail(email string, db *gorm.DB) *Student {
 // function UpdateUser updates specific user
 func (s *Student) UpdateStudent(id int, db *gorm.DB) (*Student, error) {
 	if err := db.Debug().Table("students").Where("id= ?", s.ID).Updates(Student{
-		Username:    s.Username,
-		Email:       s.Email,
-		Password:    s.Password,
-		PhoneNumber: s.PhoneNumber}).Error; err != nil {
+		Username: s.Username,
+		Email:    s.Email,
+		Password: s.Password}).Error; err != nil {
 		return &Student{}, err
 	}
 	return s, nil

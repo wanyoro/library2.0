@@ -89,31 +89,55 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["isbn"])
 	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
+		responses.ERROR(w, http.StatusBadRequest, fmt.Errorf("invalid ISBN: %v", err))
 		return
 	}
 
+	//Get existing book
+	book := models.Book{}
+	BookGotten, err := book.GetBookById(id, a.DB)
+	if err != nil {
+		resp["status"] = "failed"
+		resp["message"] = "book not found"
+		return
+	}
+
+	//Read request body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
-	book := models.Book{}
-	BookGotten, err := book.GetBookById(id, a.DB)
-	if err != nil {
-		resp["status"] = "failed"
-		resp["message"] = "book does not exist in database"
-		return
-	}
-
-	err = json.Unmarshal(body, &BookGotten)
+	//Decode into temporary book struct
+	var updateData models.Book
+	err = json.Unmarshal(body, &updateData)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
-	book.Validate("updatereadingprogress")
+	//err = json.Unmarshal(body, &BookGotten)
+	//if err != nil {
+	//	responses.ERROR(w, http.StatusBadRequest, err)
+	//	return
+	//}
+
+	//Update only provided fields
+	if updateData.Subject != "" {
+		BookGotten.Subject = updateData.Subject
+	}
+	if updateData.ISBN != 0 {
+		BookGotten.ISBN = updateData.ISBN
+	}
+	if updateData.Available != BookGotten.Available {
+		BookGotten.Available = updateData.Available
+	}
+	if updateData.StudentID != 0 {
+		BookGotten.StudentID = updateData.StudentID
+	}
+
+	//book.Validate("updatereadingprogress")
 
 	UpdatedBook, err := BookGotten.UpdateBook(id, a.DB)
 	if err != nil {
@@ -124,8 +148,8 @@ func (a *App) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		resp["status"] = "Success"
 		resp["message"] = "Book updated successfully"
 	}
-	resp["book"], _ = UpdatedBook.GetBookById(id, a.DB)
-	responses.JSON(w, http.StatusCreated, resp)
+	resp["book"] = UpdatedBook
+	responses.JSON(w, http.StatusOK, resp)
 }
 
 // sendMessage sends a message to the WebSocket connection
@@ -206,7 +230,7 @@ func (a *App) UpdateReadingProgress(w http.ResponseWriter, r *http.Request) {
 	//Notify client if isRead is true
 	if *UpdatedBook.IsRead {
 		notification := Notification{
-			Message: "Book of ISBN" + strconv.Itoa(int(UpdatedBook.ISBN)) + "is read by student of id"  + strconv.Itoa(int(UpdatedBook.StudentID)),
+			Message: "Book of ISBN" + strconv.Itoa(int(UpdatedBook.ISBN)) + "is read by student of id" + strconv.Itoa(int(UpdatedBook.StudentID)),
 		}
 		broadcast <- notification
 
