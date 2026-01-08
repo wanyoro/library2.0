@@ -208,7 +208,7 @@ func (a *App) AssignTeacherBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bookgotten, err := Book.GetBookById(id, a.DB)
-	if err != nil{
+	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -217,9 +217,38 @@ func (a *App) AssignTeacherBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if Teacher.BooksAssigned >= 20 {
-		responses.JSON(w, http.StatusBadRequest, fmt.Sprintf("Teacher has been issued with max books please return to issue"))
+		responses.JSON(w, http.StatusBadRequest, fmt.Errorf("Teacher has been issued with max books please return to issue"))
 		return
 	}
-	
+	overdue, err := Book.GetOverDueDaysPerTeacher(Book.TeacherID, a.DB)
+
+	if overdue.OverdueDays != 0 {
+		responses.JSON(w, http.StatusBadRequest, fmt.Sprintf("Teacher is in possession of overdue book of isbn %v and subject %s ; please return to issue", overdue.ISBN, overdue.Subject))
+		return
+	}
+
+	err = json.Unmarshal(body, &bookgotten)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	book.Validate("issuebook")
+
+	issuedBook, err := bookgotten.AssignBookToTeacher(id, a.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err != nil {
+		resp["Status"] = "Failed"
+		resp["Message"] = err.Error()
+		responses.JSON(w, http.StatusInternalServerError, resp)
+		return
+	}
+
+	resp["book"] = issuedBook
+	responses.JSON(w, http.StatusOK, resp)
 
 }

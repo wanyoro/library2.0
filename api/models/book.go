@@ -306,6 +306,21 @@ func (b *Book) IssueBook(id int, db *gorm.DB) (*Book, error) {
 	return b, nil
 }
 
+// func AssignBookToTeacher assigns book to teacher
+func (b *Book) AssignBookToTeacher(id int, db *gorm.DB) (*Book, error) {
+	currentTime := time.Now()
+	returnDate := currentTime.AddDate(0, 0, 30)
+	if err := db.Debug().Table("books").Where("isbn=?", b.ISBN).Updates(map[string]interface{}{
+		"is_read":        "false",
+		"teacher_id":     b.TeacherID,
+		"available":      "false",
+		"available_date": returnDate}).Error; err != nil {
+		return &Book{}, err
+
+	}
+	return b, nil
+}
+
 // func DeleteBook removes books from db
 func (b *Book) DeleteBookByISBN(isbn int, db *gorm.DB) *Book {
 	if err := db.Debug().Where("isbn=?", isbn).Delete(&Book{}).Error; err != nil {
@@ -379,26 +394,25 @@ func (b *Book) GetOverDueDaysPerTeacher(studentID uint, db *gorm.DB) (*OverdueDa
 
 }
 
-//func CheckMaxBooksAllowed checks if student/teacher has exceeded max allowed books
+// func CheckMaxBooksAllowed checks if student/teacher has exceeded max allowed books
 func (b *Book) CheckMaxBooksAllowed(student uint, teacher uint, db *gorm.DB) (bool, error) {
 	var count int64
 	var stu = Student{}
-	if err := db.Debug().Table("books").Where("studentid", stu.BooksAssigned).Count(&count).Error; err!= nil{
+	if err := db.Debug().Table("books").Where("studentid", stu.BooksAssigned).Count(&count).Error; err != nil {
 		return false, err
 	}
 	if count >= 10 {
 		return false, nil
 	}
-	return true, nil 
+	return true, nil
 
 	var teach = Teacher{}
 
-	if err := db.Debug().Table("books").Where("teacherid", teach.BooksAssigned).Count(&count).Error; err!= nil{
+	if err := db.Debug().Table("books").Where("teacherid", teach.BooksAssigned).Count(&count).Error; err != nil {
 		return false, err
 	}
 	if count >= 20 {
 		return false, nil
-
 
 	}
 	return true, nil
