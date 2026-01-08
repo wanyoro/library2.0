@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"strconv"
 
 	//"errors"
 
@@ -184,3 +185,41 @@ func (a *App) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 // }
 
 //RequestPasswordReset generates a reset token and sends an email
+
+func (a *App) AssignTeacherBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "Application/json")
+	var resp = map[string]interface{}{"Status": "Success", "Message": "Book Issued Succesfully"}
+	var response = map[string]interface{}{"Status": "Failed", "Message": "this book is already assigned to student/teacher"}
+
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["isbn"])
+	Book := models.Book{}
+	Teacher := models.Teacher{}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = json.Unmarshal(body, &Book)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	bookgotten, err := Book.GetBookById(id, a.DB)
+	if err != nil{
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	if bookgotten.StudentID != 0 || bookgotten.TeacherID != 0 {
+		responses.JSON(w, http.StatusBadRequest, response)
+		return
+	}
+	if Teacher.BooksAssigned >= 20 {
+		responses.JSON(w, http.StatusBadRequest, fmt.Sprintf("Teacher has been issued with max books please return to issue"))
+		return
+	}
+	
+
+}

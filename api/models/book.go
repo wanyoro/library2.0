@@ -77,6 +77,7 @@ type BookDefaulters struct {
 type OverdueDays struct {
 	ISBN        uint   `gorm:references: "isbn"`
 	StudentId   uint   `json :"StudentId"`
+	TeacherID   uint   `json :"TeacherID"`
 	Subject     string `json:"subject"`
 	OverdueDays uint   //`json:"overdue_days"`
 }
@@ -366,4 +367,39 @@ func (b *Book) GetOverDueDaysPerStudent(studentID uint, db *gorm.DB) (*OverdueDa
 	}
 	return overdueDays, nil
 
+}
+
+// func GetOverDueDaysPerStudent
+func (b *Book) GetOverDueDaysPerTeacher(studentID uint, db *gorm.DB) (*OverdueDays, error) {
+	var overdueDays = &OverdueDays{}
+	if err := db.Debug().Raw("select isbn, teacher_id, subject, extract(day from age(current_date, available_date)) as overdue_days from books where current_date > available_date and teacher_id=?", b.TeacherID).Find(&overdueDays).Error; err != nil {
+		return nil, err
+	}
+	return overdueDays, nil
+
+}
+
+//func CheckMaxBooksAllowed checks if student/teacher has exceeded max allowed books
+func (b *Book) CheckMaxBooksAllowed(student uint, teacher uint, db *gorm.DB) (bool, error) {
+	var count int64
+	var stu = Student{}
+	if err := db.Debug().Table("books").Where("studentid", stu.BooksAssigned).Count(&count).Error; err!= nil{
+		return false, err
+	}
+	if count >= 10 {
+		return false, nil
+	}
+	return true, nil 
+
+	var teach = Teacher{}
+
+	if err := db.Debug().Table("books").Where("teacherid", teach.BooksAssigned).Count(&count).Error; err!= nil{
+		return false, err
+	}
+	if count >= 20 {
+		return false, nil
+
+
+	}
+	return true, nil
 }

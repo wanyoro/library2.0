@@ -17,6 +17,7 @@ type Teacher struct {
 	Username string `gorm:"size:50;unique_index;not null"    json:"username"`
 	Email    string `gorm:"size:100;unique_index;not null"   json:"email"`
 	Password string `gorm:"size:100;not null"                json:"password"`
+	BooksAssigned int `json:"booksassigned`
 	//Notification []Notification
 }
 
@@ -140,3 +141,6 @@ func (t *Teacher) GetTeacherByUsername(email string, db *gorm.DB) (*Teacher, err
 
 // 	return "Password Changed", nil
 // }
+
+//func assignteacherbook issues book to a teacher for a given period
+func (t *Teacher) AssignTeacherBook ()

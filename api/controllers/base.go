@@ -91,4 +91,5 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/completedBook/{isbn}", a.CompleteBook).Methods("POST")
 	//a.Router.HandleFunc("/averagerating/{isbn}", a.GetAverageRating).Methods("GET")
 	a.Router.HandleFunc("/ws", a.handleWebSocket)
+	a.Router.HandleFunc("/teacherassignbook/{isbn}", a.AssignTeacherBook).Methods("PUT")
 }
